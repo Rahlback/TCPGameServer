@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgxu462k5lmur"]
+
+[ext_resource type="Texture2D" uid="uid://b6qj0t4i72q8e" path="res://board_color_game/new_noise_texture_2d.tres" id="1_wplnj"]
+
+[node name="NoiseTemplate" type="Node2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_wplnj")

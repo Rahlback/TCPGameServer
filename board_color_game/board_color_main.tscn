@@ -1,0 +1,39 @@
+[gd_scene load_steps=2 format=3 uid="uid://kgcdpyukdks5"]
+
+[ext_resource type="Script" path="res://board_color_game/board_color_main.gd" id="1_vbcky"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_vbcky")
+
+[node name="PlayerList" type="VBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/separation = -5
+
+[node name="PlayerListGrid" type="GridContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+columns = 10
+
+[node name="PlayerRichLabelTemplate" type="RichTextLabel" parent="PlayerListGrid"]
+visible = false
+layout_mode = 2
+fit_content = true
+autowrap_mode = 0
+
+[node name="PlayerLabel" type="Label" parent="PlayerListGrid"]
+visible = false
+layout_mode = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(594, 302)
+
+[node name="GameTick" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
+[node name="HistoryTick" type="Timer" parent="."]
+wait_time = 0.05
+
+[connection signal="timeout" from="GameTick" to="." method="_on_game_tick_timeout"]
+[connection signal="timeout" from="HistoryTick" to="." method="_on_history_tick_timeout"]
