@@ -13,6 +13,7 @@ var current_connections := 0
 var used_user_ids = []
 
 var server := TCPServer.new() ## TCP server which will be running
+
 ## A dictionary containing all peers currently connected.
 ## Will be of the format { peer_id: [Peer] }
 var peers: Dictionary 
@@ -52,6 +53,13 @@ func send_string(id: int, message: String, target_dict = peers):
 	if id == 0:
 		for peer: Peer in target_dict:
 			peer.tcp_stream.put_string(message)
+	elif id in target_dict:
+		target_dict[id].tcp_stream.put_string(message)
+
+func send_string_to_group(ids: Array[int], message):
+	for id in ids:
+		if id in peers:
+			peers[id].tcp_stream.put_string(message)
 
 ## Checks if a pending peer has established a connection. If it has, add it to 
 ## [member non_registered_peers].
@@ -131,7 +139,8 @@ func _register_peer(peer: StreamPeerTCP):
 		if not _complete_register_peer(new_peer):
 			new_peer.tcp_stream.put_string("NOK")
 		else:
-			new_peer.tcp_stream.put_string("OK")
+			pass
+			# new_peer.tcp_stream.put_string("OK") # TODO: Maybe we don't need this
 		return true
 
 	return false

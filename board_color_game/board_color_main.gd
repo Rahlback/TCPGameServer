@@ -4,12 +4,12 @@ extends Node2D
 @export var number_of_boards_per_group := 100
 
 var players : Dictionary
-var observers : Array[int] # An array of ids that the server can use to send data
+var observers : Dictionary # {player_id: [observer_id, observer_id,...]}
 var board_template = preload("res://board_color_game/board.gd")
 var board_groups = []
-var board_group_queue = []
+var board_group_queue: Array[int]
 var boards : Array[Board] = []
-
+const number_of_players_on_board = 4
 
 class Player:
 	var player_name : String
@@ -21,13 +21,13 @@ class Player:
 		self.player_name = player_name
 		self.active = true
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	randomize()
 	GameServer.peer_connected.connect(_player_connected)
 	GameServer.peer_disconnected.connect(_player_disconnected)
 	GameServer.peer_reconnected.connect(_player_reconnected)
+	GameServer.peer_message_received.connect(_receive_message)
 	GameServer.start()
 	var gen_start_time = Time.get_ticks_msec()
 	for x in range(0, 1000):
@@ -70,8 +70,8 @@ func _unhandled_input(event):
 
 func _player_connected(player_id: int, player_name: String):
 	if player_name == "observer":
-		observers.append(player_id)
-		print("Observer connected")
+		#observers.append(player_id)
+		print("Observer connected. Don't really do anything")
 		return
 	print("Player connected: %s %s" % [player_id, player_name])
 	players[player_id] = Player.new(player_name)
@@ -80,6 +80,13 @@ func _player_connected(player_id: int, player_name: String):
 	new_label.show()
 	$PlayerListGrid.add_child(new_label)
 	players[player_id].player_label = new_label
+	
+	send_message(player_id, "Welcome to the Game!")
+	board_group_queue.append(player_id)
+	if board_group_queue.size() == number_of_players_on_board:
+		start_game(board_group_queue) # concurrency might be an issue?
+		board_group_queue.clear()
+	
 	
 
 func _player_disconnected(player_id: int):
@@ -94,6 +101,29 @@ func _player_reconnected(player_id: int):
 	players[player_id].player_label.clear()
 	players[player_id].player_label.add_text(players[player_id].player_name)
 	players[player_id].active = true
+
+
+func _receive_message(id, message):
+	if id in players:
+		_receive_player_message(id, message)
+	elif id in observers:
+		_receive_observer_message(id, message)
+
+func _receive_observer_message(observer_id, message):
+	pass
+	
+func _receive_player_message(player_id, message):
+	pass
+	
+
+func send_message(id, message):
+	GameServer.send_string(id, message)
+
+# TODO: Send info message to players. Send boards to players.
+# Ask for moves.
+func start_game(players):
+	GameServer.send_string_to_group(players, "GAME_STARTING")
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
