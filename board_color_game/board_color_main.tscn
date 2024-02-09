@@ -29,8 +29,8 @@ layout_mode = 2
 position = Vector2(594, 302)
 
 [node name="GameTick" type="Timer" parent="."]
-wait_time = 0.05
-autostart = true
+wait_time = 0.819
+one_shot = true
 
 [node name="HistoryTick" type="Timer" parent="."]
 wait_time = 0.05

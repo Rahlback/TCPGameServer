@@ -4,18 +4,20 @@ extends Node2D
 @export var number_of_boards_per_group := 100
 
 var players : Dictionary
-var observers : Dictionary # {player_id: [observer_id, observer_id,...]}
+var observers : Dictionary # {observer_id: bool active}
 var board_template = preload("res://board_color_game/board.gd")
 var board_groups = []
 var board_group_queue: Array[int]
 var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
+
 class Player:
 	var player_name : String
 	var active : bool
 	var player_label : RichTextLabel = null # Potentially remove?
 	var disconnect_time : int = 0
+	var observers : Array[int] # A list of all observers
 
 	func _init(player_name: String):
 		self.player_name = player_name
@@ -29,15 +31,6 @@ func _ready():
 	GameServer.peer_reconnected.connect(_player_reconnected)
 	GameServer.peer_message_received.connect(_receive_message)
 	GameServer.start()
-	var gen_start_time = Time.get_ticks_msec()
-	for x in range(0, 1000):
-		var board: Board = board_template.new()
-		await board.generate_random_board(5 + randi() % 15, 5 + randi() % 15)
-		boards.append(board)
-	print("Time to generate boards: ", Time.get_ticks_msec() - gen_start_time, " ms")
-	for board in boards:
-		board.setup_players(players_test)
-	_after_ready()
 
 var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
 
@@ -126,8 +119,35 @@ func start_game(players):
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
+var total_time = 0
+var show = false
 func _process(delta):
+	if boards.size() < 10000:
+		var t_s = Time.get_ticks_msec()
+		_generate_boards(75)
+		var t_e = Time.get_ticks_msec()
+		var diff = t_e - t_s
+		#print("Time to complete: ", diff)
+		total_time += diff
+	elif not show:
+		show = not show
+		print("Total time spent: ", total_time)
+	
+	
+func _physics_process(delta):
 	pass
+	
+func _generate_boards(number_of_boards: int = 1):
+	for x in range(number_of_boards):
+		var size = 0
+		var board: Board = board_template.new()
+		var width = 5 + randi() % 15
+		var height = 5 + randi() % 15
+		
+		board.generate_random_board(width, height)
+		boards.append(board)
+
+
 
 
 # This is testing stuff
@@ -150,5 +170,5 @@ func _on_game_tick_timeout():
 func _on_history_tick_timeout():
 	if boards[current_board].history_playback_step():
 		$HistoryTick.stop()
-	print(boards[current_board].count_colors())
+	#print(boards[current_board].count_colors())
 	_after_ready()

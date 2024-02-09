@@ -62,7 +62,7 @@ func generate_random_board(width: int = 0, height: int = 0, main := true):
 	noise.noise.set_seed(seed_number)
 	#print("Using seed: ", seed_number, " w=", width, ", h=", height)
 	await noise.changed
-	
+
 	var board_image := Image.create(width, height, false, Image.FORMAT_RGBA8)
 	
 	var img: Image = noise.get_image()

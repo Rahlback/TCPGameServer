@@ -4,4 +4,4 @@ res://board_color_game/board_color_main.gdshader
 res://game_server/game_server.tscn
 res://board_color_game/noise_template.tscn
 res://board_color_game/board_color_main.gd
-res://game_server/game_server.gd
+res://board_color_game/board.gd
