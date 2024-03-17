@@ -20,9 +20,14 @@ const NOISE_TEMPLATE = preload("res://board_color_game/noise_template.tscn")
 const NEW_NOISE_TEXTURE_2D = preload("res://board_color_game/new_noise_texture_2d.tres")
 
 var player_colors : Dictionary
-var player_positions : Dictionary
+var player_positions : Dictionary ## {player_id: Vector2i}
+var player_numbers : Dictionary
+var rev_player_numbers : Dictionary
+
 var board : Image
 var starting_board : Image
+
+var obstacles_serialized : PackedByteArray
 
 var starting_positions : Array[Vector2i]
 var movement = {"U": Vector2i(0, -1), "L": Vector2i(-1, 0),
@@ -91,6 +96,7 @@ func generate_random_board(width: int = 0, height: int = 0, main := true):
 
 
 ## Setup players. Will assign start positions to each player and save colors.
+## Should be called after generating a board
 ## [br]. players = {player_id: Color}
 func setup_players(players: Dictionary):
 	if not board:
@@ -102,8 +108,44 @@ func setup_players(players: Dictionary):
 		player_positions[player_id] = starting_positions[current_start_pos]
 		board.set_pixelv(player_positions[player_id], player_colors[player_id])
 		current_start_pos += 1
+		player_numbers[player_id] = current_start_pos
+		rev_player_numbers[current_start_pos] = player_id
 	
 	starting_board = board.duplicate(true)
+	
+## Gets the player number, i.e. player 1, 2, 3 or 4 from the player id.
+func get_player_number(player_id) -> int:
+	if player_id in rev_player_numbers:
+		return rev_player_numbers[player_id]
+	else:
+		return -1
+
+## Get player id from player number. Player number is 1, 2, 3 or 4.
+func get_player_id_from_number(player_number) -> int:
+	if player_number in player_numbers:
+		return player_numbers[player_number]
+	else:
+		return -1
+
+## Get a serialized version of the positions.
+## [br]
+## 12 bytes in total [br]
+## 3 bytes per player, starting with player 1 and going up to player 4 [br]
+## Example, player -> [x, y] coordinates: [br] 
+## player 1 -> [0, 0] = byteArray(1, 0, 0) [br]
+## player 2 -> [5, 3] = byteArray(2, 5, 3) [br]
+## player 3 -> [2, 5] = byteArray(3, 2, 5) [br]
+## player 4 -> [1, 2] = byteArray(4, 1, 2) [br]
+## Will give the following byte array [br]
+## 1, 0, 0, 2, 5, 3, 3, 2, 5, 4, 1, 2 [br] [br] There will be no extra preamble
+func get_serialized_player_number_positions() -> PackedByteArray:
+	var data : PackedByteArray = []
+	for player_number in player_numbers:
+		var player_pos : Vector2i = player_positions[player_number]
+		data.append(player_numbers[player_number])
+		data.append(player_pos.x)
+		data.append(player_pos.y)
+	return data
 	
 
 func validate_board(board_img: Image, start_pos: Vector2i, no_single_lanes = true):
@@ -249,8 +291,77 @@ func count_colors():
 			colors[color] += 1
 		offset += 4
 	return colors
+
+## Turn board into a string?
+## TODO Decide serialized version of board
+## The serialized board consists of 4 bytes followed by several blocks of bytes.
+## [br] The first 4 bytes describe the width and the height of the board.
+## [br] Each "block" of bytes after describes a single row in the board.
+## [br] A wall = 0b1, and an empty tile = 0b0 [br]
+## The serialized version of the board is of the form: [br]
+## 2 bytes -> width of board, this is the number of bits needed for a single row [br]
+## 2 bytes -> height of board (number of rows)[br]
+## number of rows (blocks of bytes) [ [br]
+##		number_of_bytes_per_row
+## ]
+func serialize_board():
+	# width = 15
+	var bytes_per_row = ceil(board.get_width() / 8.0) # Get number 
+	var bits_per_row = board.get_width()
+	var num_of_rows = board.get_height()
+	
+	var pixel_data = board.get_data()
+	var simple_data: Array[int]
+	var current_num := 0
+	
+	var byte_offset = 0
+	var current_byte := 0
+	var number_of_bits := 0
+	var row_bits := 0
+	while byte_offset < pixel_data.size():
+		var color_slice = pixel_data.slice(byte_offset, byte_offset+4)
+		var color = Color(color_slice[0], color_slice[1], color_slice[2], color_slice[3])
+		var current_bit := 0
+		if compare_colors(Color.BLACK, color):
+			current_bit = 1
+		
+		current_num = (current_num << 1) + current_bit
+		row_bits += 1
+		if row_bits == bits_per_row:
+			simple_data.append(current_num)
+			current_num = 0
+			row_bits = 0
+		
+		byte_offset += 4
+	
+	obstacles_serialized.clear()
+	for row in simple_data:
+		var row_bits_b := 0
+		var byte_mask = 0xff
+		while row_bits_b < bits_per_row:
+			obstacles_serialized.append(row & byte_mask)
+			row_bits_b += 8
+			row >>= 8
+		
+	return obstacles_serialized
+	
+		
+	
+## Returns the board layout, only including white spaces (zeroes) and walls (ones)
+func get_obstacle_serialized():
+	if obstacles_serialized:
+		return obstacles_serialized
+	
+	else:
+		return serialize_board()
+		
+func get_width():
+	return board.get_width()
+	
+func get_height():
+	return board.get_height()
+	
 # TODO
-# Function to move players on board based on input. Return updated state of the board.
 # Function to get updated state of the board 
 # Save history of the players? In order to be able to repeat it.
 # Maybe just have an observer instead?

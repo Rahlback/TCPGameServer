@@ -57,9 +57,33 @@ func send_string(id: int, message: String, target_dict = peers):
 		target_dict[id].tcp_stream.put_string(message)
 
 func send_string_to_group(ids: Array[int], message):
+	var result = OK
 	for id in ids:
 		if id in peers:
 			peers[id].tcp_stream.put_string(message)
+		else:
+			print_debug("Id: ", id, " not in peers")
+			result = FAILED
+	return result
+
+func send_data_to_group(ids: Array[int], data: PackedByteArray):
+	var result = OK
+	for id in ids:
+		if id in peers:
+			peers[id].tcp_stream.put_data(data)
+		else:
+			print_debug("Id: ", id, " not in peers")
+			result = FAILED
+	return result
+
+func receive_message(peer: Peer):
+	print("Receive message")
+	var available_data = peer.tcp_stream.get_available_bytes()
+	var message = peer.tcp_stream.get_string(available_data)
+	peer_message_received.emit(peer.user_id, message)
+
+func send_data(id: int, data: PackedByteArray):
+	return send_data_to_group([id], data)
 
 ## Checks if a pending peer has established a connection. If it has, add it to 
 ## [member non_registered_peers].
@@ -126,13 +150,20 @@ func _register_peer(peer: StreamPeerTCP):
 		var regex = RegEx.new()
 		regex.compile("\\d+")
 		var user_id_ss = regex.search(message, message.find("user_id=") + 8)
+		if not user_id_ss:
+			return
 		var user_id = user_id_ss.get_string() as int
+		print("User id: ", user_id, " X")
 		
 		regex.compile("(\\d|-|\\w+)+")
 		var user_name = regex.search(message, message.find("name=") + 4)
+		if not user_name:
+			return
 
 		regex.compile(".")
 		var big_endian = regex.search(message, message.find("big_endian=") + 11)
+		if not big_endian:
+			big_endian = 1
 		peer.set_big_endian(big_endian.get_string() as int as bool)
 		
 		var new_peer := Peer._create_peer(peer, user_id, user_name.get_string(), Time.get_ticks_msec())
@@ -172,9 +203,14 @@ func _process(_delta):
 		# Check state of connection
 		#print("Peer status: ", peers[peer_id].tcp_stream.get_status())
 		peers[peer_id].tcp_stream.poll()
-		if not peers[peer_id].tcp_stream.get_status() == StreamPeerTCP.STATUS_CONNECTED:
+		#print("Peer: ", peer_id, " - ", peers[peer_id].tcp_stream.get_available_bytes())
+		if peers[peer_id].tcp_stream.get_status() != StreamPeerTCP.STATUS_CONNECTED:
 			peers_to_remove.append(peer_id)
-			#print("Peer has disconnected")
+			print("Peer has disconnected")
+		elif peers[peer_id].tcp_stream.get_available_bytes() > 0:
+			print("Peer has a message!")
+			receive_message(peers[peer_id])
+
 	
 	for peer_id in peers_to_remove:
 		disconnected_peers[peer_id] = peers[peer_id]
