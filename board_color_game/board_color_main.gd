@@ -5,9 +5,11 @@ extends Node2D
 @export var number_of_boards_per_group := 100
 @export var max_board_width := 15
 @export var max_board_height := 15
+@export var image_scale := 5
 
 @export_group("Player colors")
 @export var possible_colors: Array[Color]
+
 
 
 var players : Dictionary
@@ -60,8 +62,9 @@ func _after_ready():
 	$Sprite2D.set_texture(ImageTexture.create_from_image(boards[current_board].get_scaled_image(20)))
 	#print("Time to scale image: ", Time.get_ticks_msec() - gen_start_time, " ms")
 
-func _show_board(board: Board):
-	$Sprite2D.set_texture(ImageTexture.create_from_image(board.get_scaled_image(25)))
+func _show_board(board_group: int, board_index: int):
+	$BoardViewer.update_board(board_groups[board_index].get_scaled_image(image_scale), board_index)
+	#$Sprite2D.set_texture(ImageTexture.create_from_image(board.get_scaled_image(25)))
 
 # This is for testing
 var next_moves = {10: "R", 12: "L", 11: "R", 13: "L"}
@@ -89,7 +92,7 @@ func _unhandled_input(event):
 			game_board_index = (game_board_index + 1) % len(board_groups[board_group_index])
 		if event.is_action_pressed("S"):
 			board_group_index = (board_group_index + 1) % len(board_groups)
-		_show_board(board_groups[board_group_index][game_board_index])
+		#_show_board(board_group_index, game_board_index)
 
 var board_group_index = 0
 
@@ -143,9 +146,14 @@ func _receive_observer_message(observer_id, message):
 func _receive_player_message(player_id, message):
 	print("Received message from %s: %s" % [player_id, message])
 	print("	Part of group: %s" % players[player_id].board_group)
-	board_group_moves[players[player_id].board_group][player_id] = message
-	if len(board_group_moves[players[player_id].board_group]) == 4:
-		moves_received(players[player_id].board_group)
+	
+	var board_group_id = players[player_id].board_group
+	if len(board_groups[board_group_id]) == len(message):
+		board_group_moves[players[player_id].board_group][player_id] = message
+		if len(board_group_moves[players[player_id].board_group]) == 4:
+			moves_received(players[player_id].board_group)
+		
+	
 	
 
 func send_message(id, message):
@@ -159,13 +167,14 @@ func moves_received(board_group_id: int):
 		print(player_id)
 		players_in_group.append(player_id)
 	
-	for board_i in range(len(board_groups[board_group_id])):
+	for board_i: int in range(len(board_groups[board_group_id])):
 		var player_dict = board_group_moves[board_group_id].duplicate()
 		for player_id in board_group_moves[board_group_id]:
-			player_dict[player_id] = board_group_moves[board_group_id][player_id]
+			player_dict[player_id] = board_group_moves[board_group_id][player_id][board_i]
 		
 		board_groups[board_group_id][board_i].take_moves(player_dict)
-	_show_board(board_groups[0][0])
+		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_i)
+	#_show_board(board_groups[0][0])
 	GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
 	board_group_moves[board_group_id].clear()
 	
@@ -248,7 +257,9 @@ func start_game(players_list: Array[int]):
 	
 	GameServer.send_string_to_group(players_list, "SETUP_COMPLETE_SEND_MOVES")
 	# Development purposes
-	_show_board(game_boards[game_board_index])
+	for board in game_boards:
+		$BoardViewer.add_board(board.get_scaled_image(image_scale))
+	#_show_board(game_boards[game_board_index])
 
 
 
