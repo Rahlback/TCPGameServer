@@ -66,7 +66,15 @@ func send_string_to_group(ids: Array[int], message):
 			result = FAILED
 	return result
 
-func send_data_to_group(ids: Array[int], data: PackedByteArray):
+func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := false):
+	if add_prelude:
+		var length_of_data = len(data)
+		var prelude : PackedByteArray
+		for x in range(4):
+			prelude.append((length_of_data >> (24 - x * 8)) & 0xff)
+		
+		data = prelude + data
+	
 	var result = OK
 	for id in ids:
 		if id in peers:

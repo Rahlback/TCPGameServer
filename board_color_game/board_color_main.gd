@@ -167,6 +167,7 @@ func moves_received(board_group_id: int):
 		print(player_id)
 		players_in_group.append(player_id)
 	
+	var updated_player_positions : PackedByteArray = []
 	for board_i: int in range(len(board_groups[board_group_id])):
 		var player_dict = board_group_moves[board_group_id].duplicate()
 		for player_id in board_group_moves[board_group_id]:
@@ -174,14 +175,15 @@ func moves_received(board_group_id: int):
 		
 		board_groups[board_group_id][board_i].take_moves(player_dict)
 		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_i)
+		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
+	print(updated_player_positions)
+	GameServer.send_data_to_group(players_in_group, updated_player_positions, true)
 	GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
 	board_group_moves[board_group_id].clear()
 	
 
-# TODO: Send info message to players. Send boards to players.
-# Ask for moves.
-# TODO: Save positions for each player
+## Starts a game using the ids in [param players_list]. [br]
 var game_board_index = 0
 func start_game(players_list: Array[int]):
 	var game_boards := await _generate_boards(number_of_boards_per_group)
@@ -232,6 +234,7 @@ func start_game(players_list: Array[int]):
 	var player_positions_data : PackedByteArray
 	for board in game_boards:
 		player_positions_data += board.get_serialized_player_number_positions()
+	print(player_positions_data)
 	
 	var player_position_num_of_bytes = player_positions_data.size()
 	var player_positions_message : PackedByteArray
