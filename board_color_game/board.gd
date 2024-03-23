@@ -221,7 +221,7 @@ func is_oob(pos: Vector2i):
 
 ## Simulates the next step. Returns a list of new player positions. [br]
 ## player_moves = {player_id: "X"}
-func take_moves(player_moves: Dictionary):
+func take_moves(player_moves: Dictionary, save_history := false):
 	var next_player_pos: Dictionary # {player_id: Vector2i}
 	var desired_next_pos: Dictionary # {Vector2i: player_id}
 	var occupied_spaces = []
@@ -260,9 +260,10 @@ func take_moves(player_moves: Dictionary):
 		board.set_pixelv(next_player_pos[player_id], player_colors[player_id])
 		player_positions[player_id] = next_player_pos[player_id]
 		
-	var history_item = HistoryItem.new()
-	history_item.player_positions = player_positions.duplicate(true)
-	history.append(history_item)
+	if save_history:
+		var history_item = HistoryItem.new()
+		history_item.player_positions = player_positions.duplicate(true)
+		history.append(history_item)
 
 func history_playback_setup():
 	board = starting_board

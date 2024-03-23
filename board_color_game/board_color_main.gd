@@ -23,6 +23,11 @@ var board_group_moves = []
 var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
+var move_counter := 0
+var move_prev_time := 0
+var move_time_delta := 0
+
+var zoom := Vector2(1, 1)
 
 class Player:
 	var player_name : String
@@ -85,7 +90,19 @@ func _unhandled_input(event):
 		#next_moves[10] = "D"
 	#elif event.is_action_pressed("D"):
 		#next_moves[10] = "R"
-	
+	if event is InputEventMouseMotion:
+		if Input.is_action_pressed("CameraPan"):
+			$Camera.position -= (event.relative / zoom)
+		
+	if event.is_action_pressed("CameraZoomIn"):
+		zoom += Vector2(0.05, 0.05)
+		zoom = zoom.clamp(Vector2(0.1, 0.1), Vector2(5, 5))
+		$Camera.set_zoom(zoom)
+		
+	if event.is_action_pressed("CameraZoomOut"):
+		zoom -= Vector2(0.05, 0.05)
+		zoom = zoom.clamp(Vector2(0.1, 0.1), Vector2(5, 5))
+		$Camera.set_zoom(zoom)
 		
 	if len(board_groups) > 0:
 		if event.is_action_pressed("D"):
@@ -160,27 +177,35 @@ func send_message(id, message):
 	GameServer.send_string(id, message)
 
 
-
 func moves_received(board_group_id: int):
 	var players_in_group : Array[int]
 	for player_id in board_group_moves[board_group_id]:
-		print(player_id)
 		players_in_group.append(player_id)
 	
 	var updated_player_positions : PackedByteArray = []
 	for board_i: int in range(len(board_groups[board_group_id])):
+		print(board_i, board_group_id)
 		var player_dict = board_group_moves[board_group_id].duplicate()
 		for player_id in board_group_moves[board_group_id]:
 			player_dict[player_id] = board_group_moves[board_group_id][player_id][board_i]
 		
 		board_groups[board_group_id][board_i].take_moves(player_dict)
-		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_i)
+		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_group_id)
 		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
-	print(updated_player_positions)
+	#print(updated_player_positions)
 	GameServer.send_data_to_group(players_in_group, updated_player_positions, true)
 	GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
 	board_group_moves[board_group_id].clear()
+	
+	move_counter += 1
+	var move_delta_string = "0"
+	var move_time_delta_average = 0
+	if move_prev_time != 0:
+		move_time_delta = Time.get_ticks_msec() - move_prev_time
+		move_time_delta_average = move_time_delta
+	move_prev_time = Time.get_ticks_msec()
+	$MoveCounter.set_text("Moves: " + str(move_counter) + " - " + str(move_time_delta_average))
 	
 
 ## Starts a game using the ids in [param players_list]. [br]

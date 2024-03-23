@@ -216,7 +216,7 @@ func _process(_delta):
 			peers_to_remove.append(peer_id)
 			print("Peer has disconnected")
 		elif peers[peer_id].tcp_stream.get_available_bytes() > 0:
-			print("Peer has a message!")
+			#print("Peer has a message!")
 			receive_message(peers[peer_id])
 
 	
