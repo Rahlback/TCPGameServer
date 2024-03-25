@@ -165,7 +165,7 @@ func _receive_player_message(player_id, message):
 	print("	Part of group: %s" % players[player_id].board_group)
 	
 	var board_group_id = players[player_id].board_group
-	if len(board_groups[board_group_id]) == len(message):
+	if len(board_groups[board_group_id]) == len(message): # TODO what the hell is this?
 		board_group_moves[players[player_id].board_group][player_id] = message
 		if len(board_group_moves[players[player_id].board_group]) == 4:
 			moves_received(players[player_id].board_group)
@@ -190,7 +190,7 @@ func moves_received(board_group_id: int):
 			player_dict[player_id] = board_group_moves[board_group_id][player_id][board_i]
 		
 		board_groups[board_group_id][board_i].take_moves(player_dict)
-		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_group_id)
+		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_i)
 		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
 	#print(updated_player_positions)
