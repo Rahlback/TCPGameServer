@@ -8,6 +8,8 @@ var y_offset = 0
 
 var switch_row_tracker : int = 0
 
+var board_groups : Dictionary
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
@@ -17,7 +19,10 @@ func _ready():
 func _process(delta):
 	pass
 
-func add_board(initial_image:  Image):
+func add_board(initial_image:  Image, board_group : int):
+	if not board_group in board_groups:
+		board_groups[board_group] = []
+		
 	var new_sprite : Sprite2D = Sprite2D.new()
 	new_sprite.position.x = x_offset
 	new_sprite.position.y = y_offset
@@ -30,8 +35,8 @@ func add_board(initial_image:  Image):
 		y_offset += y_step
 		x_offset = 0
 		switch_row_tracker = 0
-	
+	board_groups[board_group].append(new_sprite)
 
-func update_board(new_image: Image, index: int):
-	get_child(index).set_texture(ImageTexture.create_from_image(new_image))
+func update_board(new_image: Image, board_group : int, index: int):
+	board_groups[board_group][index].set_texture(ImageTexture.create_from_image(new_image))
 

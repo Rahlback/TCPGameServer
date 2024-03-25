@@ -26,6 +26,7 @@ const number_of_players_on_board = 4
 var move_counter := 0
 var move_prev_time := 0
 var move_time_delta := 0
+var time_start := 0
 
 var zoom := Vector2(1, 1)
 
@@ -161,15 +162,19 @@ func _receive_observer_message(observer_id, message):
 	pass
 	
 func _receive_player_message(player_id, message):
-	print("Received message from %s: %s" % [player_id, message])
-	print("	Part of group: %s" % players[player_id].board_group)
+	#print("Received message from %s: %s. len=%s" % [player_id, message, len(message)])
+	print("Received message from %s: len=%s" % [player_id, len(message)])
+	#print("	Part of group: %s" % players[player_id].board_group)
 	
 	var board_group_id = players[player_id].board_group
-	if len(board_groups[board_group_id]) == len(message): # TODO what the hell is this?
+	
+	# If number of boards is the same as the message
+	if len(board_groups[board_group_id]) == len(message):
 		board_group_moves[players[player_id].board_group][player_id] = message
 		if len(board_group_moves[players[player_id].board_group]) == 4:
 			moves_received(players[player_id].board_group)
-		
+	else:
+		GameServer.send_string(player_id, "RESEND_MOVE")
 	
 	
 
@@ -184,13 +189,13 @@ func moves_received(board_group_id: int):
 	
 	var updated_player_positions : PackedByteArray = []
 	for board_i: int in range(len(board_groups[board_group_id])):
-		print(board_i, board_group_id)
+		#print(board_i, board_group_id)
 		var player_dict = board_group_moves[board_group_id].duplicate()
 		for player_id in board_group_moves[board_group_id]:
 			player_dict[player_id] = board_group_moves[board_group_id][player_id][board_i]
 		
 		board_groups[board_group_id][board_i].take_moves(player_dict)
-		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_i)
+		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_group_id, board_i)
 		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
 	#print(updated_player_positions)
@@ -205,7 +210,7 @@ func moves_received(board_group_id: int):
 		move_time_delta = Time.get_ticks_msec() - move_prev_time
 		move_time_delta_average = move_time_delta
 	move_prev_time = Time.get_ticks_msec()
-	$MoveCounter.set_text("Moves: " + str(move_counter) + " - " + str(move_time_delta_average))
+	$MoveCounter.set_text("Moves: " + str(move_counter) + " - " + str((move_prev_time - time_start) / move_counter) + " ms/frame")
 	
 
 ## Starts a game using the ids in [param players_list]. [br]
@@ -286,9 +291,9 @@ func start_game(players_list: Array[int]):
 	GameServer.send_string_to_group(players_list, "SETUP_COMPLETE_SEND_MOVES")
 	# Development purposes
 	for board in game_boards:
-		$BoardViewer.add_board(board.get_scaled_image(image_scale))
+		$BoardViewer.add_board(board.get_scaled_image(image_scale), len(board_groups)-1)
 	#_show_board(game_boards[game_board_index])
-
+	time_start = Time.get_ticks_msec()
 
 
 
