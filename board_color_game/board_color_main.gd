@@ -10,6 +10,8 @@ extends Node2D
 @export_group("Player colors")
 @export var possible_colors: Array[Color]
 
+@export_group("Debug")
+@export var show_boards := true
 
 
 var players : Dictionary
@@ -29,6 +31,9 @@ var move_time_delta := 0
 var time_start := 0
 
 var zoom := Vector2(1, 1)
+
+# debug
+var lost_moves = 0 
 
 class Player:
 	var player_name : String
@@ -160,7 +165,7 @@ func _receive_message(id, message):
 
 func _receive_observer_message(observer_id, message):
 	pass
-	
+
 func _receive_player_message(player_id, message):
 	#print("Received message from %s: %s. len=%s" % [player_id, message, len(message)])
 	print("Received message from %s: len=%s" % [player_id, len(message)])
@@ -174,6 +179,8 @@ func _receive_player_message(player_id, message):
 		if len(board_group_moves[players[player_id].board_group]) == 4:
 			moves_received(players[player_id].board_group)
 	else:
+		lost_moves += 1
+		$LostMoves.set_text("Lost moves: " + str(lost_moves))
 		GameServer.send_string(player_id, "RESEND_MOVE")
 	
 	
@@ -195,7 +202,8 @@ func moves_received(board_group_id: int):
 			player_dict[player_id] = board_group_moves[board_group_id][player_id][board_i]
 		
 		board_groups[board_group_id][board_i].take_moves(player_dict)
-		$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_group_id, board_i)
+		if show_boards:
+			$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_group_id, board_i)
 		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
 	#print(updated_player_positions)
@@ -290,8 +298,9 @@ func start_game(players_list: Array[int]):
 	
 	GameServer.send_string_to_group(players_list, "SETUP_COMPLETE_SEND_MOVES")
 	# Development purposes
-	for board in game_boards:
-		$BoardViewer.add_board(board.get_scaled_image(image_scale), len(board_groups)-1)
+	if show_boards:
+		for board in game_boards:
+			$BoardViewer.add_board(board.get_scaled_image(image_scale), len(board_groups)-1)
 	#_show_board(game_boards[game_board_index])
 	time_start = Time.get_ticks_msec()
 

@@ -87,20 +87,20 @@ func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := f
 	return result
 
 func receive_message(peer: Peer):
-	var message_buffer : PackedByteArray
-	
-	while len(message_buffer) < 4:
-		var message = peer.tcp_stream.get_partial_data(1)
-		message_buffer += message[1]
-		
-	var length_of_message = message_buffer # TODO fix this so that length_of_message is the actual length of the message
-	
-	message_buffer.clear()
-	
-	var final_message : PackedByteArray
-	while len(message_buffer) < length_of_message:
-		var message = peer.tcp_stream.get_partial_data(1)
-		message_buffer += message[1]
+	#var message_buffer : PackedByteArray
+	#
+	#while len(message_buffer) < 4:
+		#var message = peer.tcp_stream.get_partial_data(1)
+		#message_buffer += message[1]
+		#
+	#var length_of_message = message_buffer # TODO fix this so that length_of_message is the actual length of the message
+	#
+	#message_buffer.clear()
+	#
+	#var final_message : PackedByteArray
+	#while len(message_buffer) < length_of_message:
+		#var message = peer.tcp_stream.get_partial_data(1)
+		#message_buffer += message[1]
 		
 	#
 	
@@ -110,11 +110,11 @@ func receive_message(peer: Peer):
 		##message_buffer += message[1]
 	#
 	#
-	#var available_data = peer.tcp_stream.get_available_bytes()
-	#var message = peer.tcp_stream.get_string(-1)
+	var available_data = peer.tcp_stream.get_available_bytes()
+	var message = peer.tcp_stream.get_string(available_data)
 	#message = message.get_string_from_ascii()
-	print("Receive message: ", peer.user_id, " message= ", message_buffer)
-	peer_message_received.emit(peer.user_id, message_buffer.get_string_from_ascii())
+	print("Receive message: ", peer.user_id, " message= ", message)
+	peer_message_received.emit(peer.user_id, message)
 
 func send_data(id: int, data: PackedByteArray):
 	print("Sending data")
