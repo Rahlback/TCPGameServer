@@ -8,6 +8,7 @@ extends Node
 
 @export_range(444, 65535) var PORT := 9080 ## TCP server port
 @export var max_connections := 100 ## Max number of clients that can be connected at once
+@export_range(500, 10000, 50) var heartbeat_timer_ms := 1000
 var current_connections := 0
 
 var used_user_ids = []
@@ -53,6 +54,7 @@ func send_string(id: int, message: String, target_dict = peers):
 	print("Send string to: ", id, ", message = ", message)
 	if id == 0:
 		for peer: Peer in target_dict:
+			peer.last_message_time = Time.get_ticks_msec()
 			peer.tcp_stream.put_string(message)
 	elif id in target_dict:
 		target_dict[id].tcp_stream.put_string(message)
@@ -61,6 +63,7 @@ func send_string_to_group(ids: Array[int], message):
 	var result = OK
 	for id in ids:
 		if id in peers:
+			peers[id].last_message_time = Time.get_ticks_msec()
 			peers[id].tcp_stream.put_string(message)
 		else:
 			print_debug("Id: ", id, " not in peers")
@@ -80,6 +83,7 @@ func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := f
 	var result = OK
 	for id in ids:
 		if id in peers:
+			peers[id].last_message_time = Time.get_ticks_msec()
 			peers[id].tcp_stream.put_data(data)
 		else:
 			print_debug("Id: ", id, " not in peers")
@@ -87,32 +91,9 @@ func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := f
 	return result
 
 func receive_message(peer: Peer):
-	#var message_buffer : PackedByteArray
-	#
-	#while len(message_buffer) < 4:
-		#var message = peer.tcp_stream.get_partial_data(1)
-		#message_buffer += message[1]
-		#
-	#var length_of_message = message_buffer # TODO fix this so that length_of_message is the actual length of the message
-	#
-	#message_buffer.clear()
-	#
-	#var final_message : PackedByteArray
-	#while len(message_buffer) < length_of_message:
-		#var message = peer.tcp_stream.get_partial_data(1)
-		#message_buffer += message[1]
-		
-	#
-	
-	##while peer.get_available_bytes() > 0:
-		###print(peer.get_available_bytes())
-		##var message = peer.get_partial_data(1)
-		##message_buffer += message[1]
-	#
-	#
+	peer.last_message_time = Time.get_ticks_msec()
 	var available_data = peer.tcp_stream.get_available_bytes()
 	var message = peer.tcp_stream.get_string(available_data)
-	#message = message.get_string_from_ascii()
 	print("Receive message: ", peer.user_id, " message= ", message)
 	peer_message_received.emit(peer.user_id, message)
 
@@ -260,13 +241,9 @@ func _process(_delta):
 	#
 	#print_counter += 1
 
-		
 
-
-
-
-
-
-
-
-# End
+func _on_heart_beat_timer_timeout():
+	var current_time = Time.get_ticks_msec()
+	for peer in peers:
+		if current_time - peers[peer].last_message_time > heartbeat_timer_ms:
+			send_string(peer, "HEARTBEAT")

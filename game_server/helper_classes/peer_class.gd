@@ -6,6 +6,7 @@ var tcp_stream : StreamPeerTCP ## TCP client connection
 var user_id : int ## User id. Nothing special. Most likely randomly generated
 var user_name : String = "" ## User name. To be provided by the client
 var time_of_connection : int
+var last_message_time : int = 0
 
 static func _create_peer(tcp_stream: StreamPeerTCP, user_id: int, user_name: String, time_of_connection: int) -> Peer:
 	var new_peer = Peer.new()

@@ -4,3 +4,8 @@
 
 [node name="GameServer" type="Node"]
 script = ExtResource("1_3e0cg")
+
+[node name="HeartBeatTimer" type="Timer" parent="."]
+autostart = true
+
+[connection signal="timeout" from="HeartBeatTimer" to="." method="_on_heart_beat_timer_timeout"]

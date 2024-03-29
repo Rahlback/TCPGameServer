@@ -41,7 +41,7 @@ class Player:
 	var player_label : RichTextLabel = null # Potentially remove?
 	var disconnect_time : int = 0
 	var observers : Array[int] # A list of all observers
-	var board_group : int
+	var board_group : int = -1
 
 	func _init(player_name: String):
 		self.player_name = player_name
@@ -173,6 +173,9 @@ func _receive_player_message(player_id, message):
 	
 	var board_group_id = players[player_id].board_group
 	
+	if board_group_id < 0:
+		print_debug("	Message received too early. ", board_group_id)
+		return
 	# If number of boards is the same as the message
 	if len(board_groups[board_group_id]) == len(message):
 		board_group_moves[players[player_id].board_group][player_id] = message
