@@ -135,9 +135,17 @@ func _player_connected(player_id: int, player_name: String):
 	send_message(player_id, "Welcome to the Game!")
 	board_group_queue.append(player_id)
 	print(board_group_queue)
+	
 	if board_group_queue.size() == number_of_players_on_board:
-		start_game(board_group_queue.duplicate()) # concurrency might be an issue?
-		board_group_queue.clear()
+		var board_players_still_active = true
+		for id in board_group_queue:
+			if not players[id].active:
+				board_players_still_active = false
+				board_group_queue.erase(id)
+		
+		if board_players_still_active:
+			start_game(board_group_queue.duplicate()) # concurrency might be an issue?
+			board_group_queue.clear()
 	
 	
 
