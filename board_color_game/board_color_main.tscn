@@ -8,7 +8,6 @@ script = ExtResource("1_vbcky")
 number_of_boards_per_group = 200
 image_scale = 10
 possible_colors = Array[Color]([Color(1, 0, 0, 1), Color(0, 1, 0, 1), Color(0, 0, 1, 1), Color(0.72549, 0.270588, 0.952941, 1), Color(0.917647, 0, 0.427451, 1), Color(0.133333, 0.572549, 0.690196, 1), Color(0.658824, 0.584314, 0.129412, 1), Color(0.854902, 0.458824, 0.215686, 1), Color(0.454902, 0.52549, 0.247059, 1), Color(0.52549, 0.517647, 0.396078, 1), Color(0.309804, 0.584314, 0.435294, 1)])
-show_boards = false
 
 [node name="PlayerList" type="VBoxContainer" parent="."]
 offset_right = 40.0
