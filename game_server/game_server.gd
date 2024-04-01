@@ -95,6 +95,9 @@ func receive_message(peer: Peer):
 	var available_data = peer.tcp_stream.get_available_bytes()
 	var message = peer.tcp_stream.get_string(available_data)
 	print("Receive message: ", peer.user_id, " message= ", message)
+	if message == "":
+		print("	Something went wrong with the packet from ", peer.user_id, ". Abort")
+		return
 	peer_message_received.emit(peer.user_id, message)
 
 func send_data(id: int, data: PackedByteArray):
