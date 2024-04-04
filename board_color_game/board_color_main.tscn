@@ -5,9 +5,9 @@
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_vbcky")
-number_of_boards_per_group = 1
-image_scale = 20
+image_scale = 15
 possible_colors = Array[Color]([Color(1, 0, 0, 1), Color(0, 1, 0, 1), Color(0, 0, 1, 1), Color(0.72549, 0.270588, 0.952941, 1), Color(0.917647, 0, 0.427451, 1), Color(0.133333, 0.572549, 0.690196, 1), Color(0.658824, 0.584314, 0.129412, 1), Color(0.854902, 0.458824, 0.215686, 1), Color(0.454902, 0.52549, 0.247059, 1), Color(0.52549, 0.517647, 0.396078, 1), Color(0.309804, 0.584314, 0.435294, 1)])
+show_boards = false
 
 [node name="PlayerList" type="VBoxContainer" parent="."]
 offset_right = 40.0
@@ -15,6 +15,7 @@ offset_bottom = 40.0
 theme_override_constants/separation = -5
 
 [node name="PlayerListGrid" type="GridContainer" parent="."]
+visible = false
 offset_right = 40.0
 offset_bottom = 40.0
 columns = 10
@@ -61,6 +62,12 @@ offset_top = 88.0
 offset_right = 953.0
 offset_bottom = 111.0
 text = "Lost moves: "
+
+[node name="DebugLayer" type="CanvasLayer" parent="."]
+
+[node name="CurrentBuffer" type="Label" parent="DebugLayer"]
+offset_right = 40.0
+offset_bottom = 23.0
 
 [connection signal="timeout" from="GameTick" to="." method="_on_game_tick_timeout"]
 [connection signal="timeout" from="HistoryTick" to="." method="_on_history_tick_timeout"]

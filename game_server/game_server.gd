@@ -71,7 +71,7 @@ func send_string_to_group(ids: Array[int], message):
 	return result
 
 func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := false):
-	print("Send data to group")
+	#print("Send data to group")
 	if add_prelude:
 		var length_of_data = len(data)
 		var prelude : PackedByteArray
@@ -93,15 +93,16 @@ func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := f
 func receive_message(peer: Peer):
 	peer.last_message_time = Time.get_ticks_msec()
 	var available_data = peer.tcp_stream.get_available_bytes()
+	#print("Available data: ", available_data)
 	var message = peer.tcp_stream.get_string(available_data)
-	print("Receive message: ", peer.user_id, " message= ", message)
-	if message == "":
-		print("	Something went wrong with the packet from ", peer.user_id, ". Abort")
-		return
+	#print("	Receive message: ", peer.user_id, " message= ", message)
+	#if message == "":
+		#print("	Something went wrong with the packet from ", peer.user_id, ". Abort")
+		#return
 	peer_message_received.emit(peer.user_id, message)
 
 func send_data(id: int, data: PackedByteArray):
-	print("Sending data")
+	#print("Sending data")
 	return send_data_to_group([id], data)
 
 ## Checks if a pending peer has established a connection. If it has, add it to 

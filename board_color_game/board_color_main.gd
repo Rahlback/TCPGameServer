@@ -176,7 +176,7 @@ func _receive_observer_message(observer_id, message):
 
 func _receive_player_message(player_id, message):
 	#print("Received message from %s: %s. len=%s" % [player_id, message, len(message)])
-	print("Received message from %s: len=%s" % [player_id, len(message)])
+	#print("Received message from %s: len=%s" % [player_id, len(message)])
 	#print("	Part of group: %s" % players[player_id].board_group)
 	
 	var board_group_id = players[player_id].board_group

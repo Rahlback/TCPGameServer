@@ -19,13 +19,16 @@ class_name Board
 const NOISE_TEMPLATE = preload("res://board_color_game/noise_template.tscn")
 const NEW_NOISE_TEXTURE_2D = preload("res://board_color_game/new_noise_texture_2d.tres")
 
-var player_colors : Dictionary
+var player_colors : Dictionary ## {player_id: Color}
 var player_positions : Dictionary ## {player_id: Vector2i}
 var player_numbers : Dictionary
 var rev_player_numbers : Dictionary
 
 var board : Image
 var starting_board : Image
+
+var cached_image_scale : int = -1
+var cached_scaled_image : Image = Image.new()
 
 var obstacles_serialized : PackedByteArray
 
@@ -186,6 +189,9 @@ func validate_board(board_img: Image, start_pos: Vector2i, no_single_lanes = tru
 	
 ## Returns an up-scaled image of the board image. 
 func get_scaled_image(scale: int = 5):
+	if cached_image_scale == scale:
+		return _get_cached_scaled_image(scale)
+	
 	var scaled_image = Image.create(board.get_width() * scale, 
 									board.get_height() * scale, false, Image.FORMAT_RGBA8)
 	
@@ -204,8 +210,31 @@ func get_scaled_image(scale: int = 5):
 		pos += Vector2i(scale/4, scale/4)
 		scaled_image.blit_rect(player_image, player_rect, pos)
 		
+	cached_image_scale = scale
+	cached_scaled_image.copy_from(scaled_image)
 	return scaled_image
+
+func _get_cached_scaled_image(scale: int = 5):
+	var scaled_pixel = Image.create(scale, scale, false, Image.FORMAT_RGBA8)
+	var scaled_pixel_rect = Rect2i(0, 0, scale, scale)
 	
+	for player_id in player_colors:
+		var pos = player_positions[player_id] * scale
+		scaled_pixel.fill(player_colors[player_id])
+		cached_scaled_image.blit_rect(scaled_pixel, scaled_pixel_rect, Vector2i(pos[0], pos[1]))
+	
+	var scaled_image = Image.new()
+	scaled_image.copy_from(cached_scaled_image)
+								
+	var player_rect = Rect2i(0, 0, scale/2, scale/2)
+	var player_image = Image.create(scale/2, scale/2, false, Image.FORMAT_RGBA8)
+	player_image.fill(Color.CORAL)
+	for player_id in player_positions:
+		var pos = player_positions[player_id] * scale
+		pos += Vector2i(scale/4, scale/4)
+		scaled_image.blit_rect(player_image, player_rect, pos)
+	return scaled_image
+
 ## Returns true if the colors are the same
 func compare_colors(a: Color, b: Color):
 	return a.r == b.r and a.g == b.g and a.b == b.b
