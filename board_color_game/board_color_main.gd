@@ -25,7 +25,7 @@ var board_group_moves = []
 var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
-var move_counter := 0
+var move_counter := 0.0
 var move_prev_time := 0
 var move_time_delta := 0
 var time_start := 0
@@ -222,7 +222,7 @@ func moves_received(board_group_id: int):
 	GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
 	board_group_moves[board_group_id].clear()
 	
-	move_counter += 1
+	move_counter += (1 / len(board_groups))
 	var move_delta_string = "0"
 	var move_time_delta_average = 0
 	if move_prev_time != 0:
