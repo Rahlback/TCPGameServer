@@ -45,7 +45,8 @@ func _ready():
 
 ## Start the TCP server
 func start():
-	server.listen(PORT)
+	var result = server.listen(PORT)
+	return result
 
 ## Sends a message as a string in ASCII. [br]
 ## [param dict] can be changed to another dictionary, depending on which
@@ -199,7 +200,6 @@ func _register_peer(peer: StreamPeerTCP):
 func _process(_delta):
 	## Check if there are any new connections available. 
 	while current_connections <= max_connections and server.is_connection_available():
-		#print("Test")
 		var new_client: StreamPeerTCP = server.take_connection()
 		pending_peers.append(new_client)
 		
