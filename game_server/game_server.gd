@@ -191,8 +191,7 @@ func _register_peer(peer: StreamPeerTCP):
 		if not _complete_register_peer(new_peer):
 			new_peer.tcp_stream.put_string("NOK")
 		else:
-			pass
-			# new_peer.tcp_stream.put_string("OK") # TODO: Maybe we don't need this
+			new_peer.tcp_stream.put_string("OK") # TODO: Maybe we don't need this
 		return true
 
 	return false

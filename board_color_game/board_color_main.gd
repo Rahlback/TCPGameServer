@@ -222,14 +222,14 @@ func moves_received(board_group_id: int):
 	GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
 	board_group_moves[board_group_id].clear()
 	
-	move_counter += (1 / len(board_groups))
+	move_counter += (1.0 / len(board_groups))
 	var move_delta_string = "0"
 	var move_time_delta_average = 0
 	if move_prev_time != 0:
 		move_time_delta = Time.get_ticks_msec() - move_prev_time
 		move_time_delta_average = move_time_delta
 	move_prev_time = Time.get_ticks_msec()
-	$MoveCounter.set_text("Moves: " + str(move_counter) + " - " + str((move_prev_time - time_start) / move_counter) + " ms/frame")
+	$MoveCounter.set_text("Moves: " + str(round(move_counter)) + " - " + str(round((move_prev_time - time_start) / move_counter)) + " ms/frame")
 	
 
 ## Starts a game using the ids in [param players_list]. [br]
