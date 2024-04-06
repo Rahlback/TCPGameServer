@@ -12,3 +12,9 @@ export_presets.cfg
 data_*/
 /.godot
 /.godot/editor
+
+# Build folder
+/build/*.exe
+
+# Images
+/images/*.png

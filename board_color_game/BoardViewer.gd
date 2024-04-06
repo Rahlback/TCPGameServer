@@ -22,7 +22,11 @@ func _process(delta):
 func add_board(initial_image:  Image, board_group : int):
 	if not board_group in board_groups:
 		board_groups[board_group] = []
-		
+	
+	#var number = get_child_count()
+	#initial_image.save_png("./images/" + str(number) + ".png")
+	
+	
 	var new_sprite : Sprite2D = Sprite2D.new()
 	new_sprite.position.x = x_offset
 	new_sprite.position.y = y_offset
