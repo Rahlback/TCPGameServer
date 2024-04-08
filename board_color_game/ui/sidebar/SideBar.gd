@@ -28,13 +28,11 @@ func add_player(player_name: String, player_id: int):
 	await get_tree().process_frame
 	if get_v_scroll_bar().max_value > get_v_scroll() and is_at_bottom:
 		set_deferred("scroll_vertical", get_v_scroll_bar().max_value + 200)
-		print(get_v_scroll_bar().max_value, " ", get_v_scroll())
-	
 
 
 func player_offline(player_id: int):
 	pass
-	
+
 func remove_player(player_id: int) -> bool:
 	if player_id in players:
 		players[player_id].queue_free()
@@ -42,10 +40,8 @@ func remove_player(player_id: int) -> bool:
 	return players.erase(player_id)
 
 func _on_mouse_entered():
-	print("SCROLL Mouse entered")
 	is_at_bottom = false
 
 func _on_mouse_exited():
-	print("SCROLL Mouse left")
 	is_at_bottom = true
 
