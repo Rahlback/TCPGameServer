@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://ufwilpjnlop"]
+
+[ext_resource type="Script" path="res://board_color_game/ui/sidebar/SideBarItem.gd" id="1_s35gi"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b15yj"]
+border_width_left = 2
+
+[node name="SideBarItem" type="PanelContainer"]
+custom_minimum_size = Vector2(225, 0)
+offset_right = 225.0
+offset_bottom = 23.0
+mouse_filter = 2
+script = ExtResource("1_s35gi")
+
+[node name="HBox" type="HBoxContainer" parent="."]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="PlayerName" type="RichTextLabel" parent="HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+text = "PlayerName"
+fit_content = true
+
+[node name="VSeparator" type="VSeparator" parent="HBox"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/separator = SubResource("StyleBoxFlat_b15yj")
+
+[node name="ConnectionStatus" type="RichTextLabel" parent="HBox"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+scroll_active = false
