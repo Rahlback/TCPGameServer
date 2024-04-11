@@ -32,6 +32,10 @@ var time_start := 0
 
 var zoom := Vector2(1, 1)
 
+# Onready items
+@onready var side_bar = $UI/SideBar
+
+
 # debug
 var lost_moves = 0 
 
@@ -80,26 +84,8 @@ func _show_board(board_group: int, board_index: int):
 # This is for testing
 var next_moves = {10: "R", 12: "L", 11: "R", 13: "L"}
 var valid_moves = ["R", "L", "U", "D"]
+
 func _unhandled_input(event):
-	#if event.is_action_pressed("ui_accept"):
-		#for player_id in next_moves:
-			#next_moves[player_id] = valid_moves.pick_random()
-		#for board in boards:
-			#board.take_moves(next_moves)
-		##boards[current_board].take_moves(next_moves)
-		#_after_ready()
-	#elif event.is_action_pressed("W"):
-		#next_moves[10] = "U"
-	#elif event.is_action_pressed("A"):
-		#next_moves[10] = "L"
-	#elif event.is_action_pressed("S"):
-		#next_moves[10] = "D"
-	#elif event.is_action_pressed("D"):
-		#next_moves[10] = "R"
-	if event is InputEventMouseMotion:
-		if Input.is_action_pressed("CameraPan"):
-			$Camera.position -= (event.relative / zoom)
-		
 	if event.is_action_pressed("CameraZoomIn"):
 		zoom += Vector2(0.05, 0.05)
 		zoom = zoom.clamp(Vector2(0.1, 0.1), Vector2(5, 5))
@@ -109,6 +95,11 @@ func _unhandled_input(event):
 		zoom -= Vector2(0.05, 0.05)
 		zoom = zoom.clamp(Vector2(0.1, 0.1), Vector2(5, 5))
 		$Camera.set_zoom(zoom)
+
+func _input(event):
+	if event is InputEventMouseMotion:
+		if Input.is_action_pressed("CameraPan"):
+			$Camera.position -= (event.relative / zoom)
 		
 	if len(board_groups) > 0:
 		if event.is_action_pressed("D"):
@@ -126,11 +117,14 @@ func _player_connected(player_id: int, player_name: String):
 		return
 	print("Player connected: %s %s" % [player_id, player_name])
 	players[player_id] = Player.new(player_name)
-	var new_label : RichTextLabel = $PlayerListGrid/PlayerRichLabelTemplate.duplicate(0)
-	new_label.set_text(players[player_id].player_name)
-	new_label.show()
-	$PlayerListGrid.add_child(new_label)
-	players[player_id].player_label = new_label
+	#var new_label : RichTextLabel = $PlayerListGrid/PlayerRichLabelTemplate.duplicate(0)
+	#new_label.set_text(players[player_id].player_name)
+	#new_label.show()
+	#$PlayerListGrid.add_child(new_label)
+	#players[player_id].player_label = new_label
+	#
+	side_bar.add_player(players[player_id].player_name, player_id)
+	
 	
 	send_message(player_id, "Welcome to the Game!")
 	board_group_queue.append(player_id)
@@ -151,16 +145,17 @@ func _player_connected(player_id: int, player_name: String):
 
 func _player_disconnected(player_id: int):
 	#players[player_id].player_label.hide()
+	players[player_id].active = false
+	players[player_id].disconnect_time = Time.get_ticks_msec()
+	side_bar.player_offline(player_id)
+	return
 	players[player_id].player_label.clear()
 	players[player_id].player_label.push_color(Color.RED)
 	players[player_id].player_label.add_text(players[player_id].player_name)
-	players[player_id].active = false
-	players[player_id].disconnect_time = Time.get_ticks_msec()
 
 # TODO Check if the player is playing any games, send the boards, positions and current status
 func _player_reconnected(player_id: int):
-	players[player_id].player_label.clear()
-	players[player_id].player_label.add_text(players[player_id].player_name)
+	side_bar.player_online(player_id)
 	players[player_id].active = true
 	GameServer.send_string(player_id, "Welcome back %s" % [players[player_id].player_name])
 
