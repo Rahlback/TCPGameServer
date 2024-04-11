@@ -11,6 +11,8 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 0
 script = ExtResource("1_bvof2")
+player_color = Color(1, 1, 1, 1)
+player_offline_color = Color(1, 0, 0, 1)
 
 [node name="ItemBox" type="VBoxContainer" parent="."]
 layout_mode = 2

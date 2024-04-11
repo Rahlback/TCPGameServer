@@ -145,17 +145,17 @@ func _player_connected(player_id: int, player_name: String):
 
 func _player_disconnected(player_id: int):
 	#players[player_id].player_label.hide()
+	players[player_id].active = false
+	players[player_id].disconnect_time = Time.get_ticks_msec()
+	side_bar.player_offline(player_id)
 	return
 	players[player_id].player_label.clear()
 	players[player_id].player_label.push_color(Color.RED)
 	players[player_id].player_label.add_text(players[player_id].player_name)
-	players[player_id].active = false
-	players[player_id].disconnect_time = Time.get_ticks_msec()
 
 # TODO Check if the player is playing any games, send the boards, positions and current status
 func _player_reconnected(player_id: int):
-	players[player_id].player_label.clear()
-	players[player_id].player_label.add_text(players[player_id].player_name)
+	side_bar.player_online(player_id)
 	players[player_id].active = true
 	GameServer.send_string(player_id, "Welcome back %s" % [players[player_id].player_name])
 
