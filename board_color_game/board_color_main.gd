@@ -115,7 +115,7 @@ func _player_connected(player_id: int, player_name: String):
 		#observers.append(player_id)
 		print("Observer connected. Don't really do anything")
 		return
-	print("Player connected: %s %s" % [player_id, player_name])
+	print_debug("Player connected: %s %s" % [player_id, player_name])
 	players[player_id] = Player.new(player_name)
 	#var new_label : RichTextLabel = $PlayerListGrid/PlayerRichLabelTemplate.duplicate(0)
 	#new_label.set_text(players[player_id].player_name)
