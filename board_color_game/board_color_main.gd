@@ -42,7 +42,6 @@ var lost_moves = 0
 class Player:
 	var player_name : String
 	var active : bool
-	var player_label : RichTextLabel = null # Potentially remove?
 	var disconnect_time : int = 0
 	var observers : Array[int] # A list of all observers
 	var board_group : int = -1
@@ -59,14 +58,7 @@ func _ready():
 	GameServer.peer_reconnected.connect(_player_reconnected)
 	GameServer.peer_message_received.connect(_receive_message)
 	GameServer.start()
-	
-	#var b = await _generate_boards()
-	#var b = board_template.new()
-	#await b.generate_random_board(18, 5)
-	#b.setup_players(players_test)
-	#_show_board(b)
-	#print(b.get_obstacle_serialized())
-	
+
 
 var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
 
@@ -115,7 +107,7 @@ func _player_connected(player_id: int, player_name: String):
 		#observers.append(player_id)
 		print("Observer connected. Don't really do anything")
 		return
-	print("Player connected: %s %s" % [player_id, player_name])
+	print_debug("Player connected: %s %s" % [player_id, player_name])
 	players[player_id] = Player.new(player_name)
 	#var new_label : RichTextLabel = $PlayerListGrid/PlayerRichLabelTemplate.duplicate(0)
 	#new_label.set_text(players[player_id].player_name)
@@ -127,6 +119,9 @@ func _player_connected(player_id: int, player_name: String):
 	
 	
 	send_message(player_id, "Welcome to the Game!")
+	add_player_to_queue(player_id)
+	
+func add_player_to_queue(player_id: int):
 	board_group_queue.append(player_id)
 	print(board_group_queue)
 	
@@ -140,11 +135,16 @@ func _player_connected(player_id: int, player_name: String):
 		if board_players_still_active:
 			start_game(board_group_queue.duplicate()) # concurrency might be an issue?
 			board_group_queue.clear()
-	
-	
 
 func _player_disconnected(player_id: int):
 	#players[player_id].player_label.hide()
+	if player_id in board_group_queue:
+		board_group_queue.erase(player_id)
+		
+	if players[player_id].board_group >= 0:
+		game_over(players[player_id].board_group)
+			
+		
 	players[player_id].active = false
 	players[player_id].disconnect_time = Time.get_ticks_msec()
 	side_bar.player_offline(player_id)
@@ -158,6 +158,7 @@ func _player_reconnected(player_id: int):
 	side_bar.player_online(player_id)
 	players[player_id].active = true
 	GameServer.send_string(player_id, "Welcome back %s" % [players[player_id].player_name])
+	add_player_to_queue(player_id)
 
 
 func _receive_message(id, message):
@@ -310,7 +311,10 @@ func start_game(players_list: Array[int]):
 	#_show_board(game_boards[game_board_index])
 	time_start = Time.get_ticks_msec()
 
-
+func game_over(board_group_id: int):
+	for player_id in board_groups[board_group_id][0].player_colors:
+		if players[player_id].active:
+			GameServer.send_string(player_id, "GAME_OVER")
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

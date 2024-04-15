@@ -141,6 +141,7 @@ func _complete_register_peer(peer: Peer) -> bool:
 		print("Peer has reconnected")
 	else:
 		peers[peer.user_id] = peer
+		peer_connected.emit(peer.user_id, peer.user_name)
 	return true
 
 ## Attempt to register a recently connected peer.
@@ -191,7 +192,7 @@ func _register_peer(peer: StreamPeerTCP):
 			new_peer.tcp_stream.put_string("NOK")
 		else:
 			new_peer.tcp_stream.put_string("OK") # TODO: Maybe we don't need this
-			peer_connected.emit(new_peer.user_id, new_peer.user_name)
+			
 		return true
 
 	return false
