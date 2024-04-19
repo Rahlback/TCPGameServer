@@ -214,6 +214,7 @@ func moves_received(board_group_id: int):
 		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
 	#print(updated_player_positions)
+	
 	GameServer.send_data_to_group(players_in_group, updated_player_positions, true)
 	GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
 	board_group_moves[board_group_id].clear()
@@ -236,6 +237,7 @@ func start_game(players_list: Array[int]):
 	
 	for i in range(players_list.size()):
 		player_setup[players_list[i]] = possible_colors[i]
+		side_bar.update_player_color(players_list[i], possible_colors[i])
 	print("Player setup: ", player_setup)
 	
 	var serialized_boards : Array[PackedByteArray]
@@ -318,7 +320,7 @@ func game_over(board_group_id: int):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	#print(board_groups[0][0].count_colors())
 	
 	
 func _physics_process(delta):

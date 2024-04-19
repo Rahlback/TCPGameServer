@@ -35,6 +35,9 @@ func add_player(player_name: String, player_id: int):
 func player_online(player_id: int, color := player_color):
 	player_offline(player_id, color)
 
+func update_player_color(player_id: int, color : Color):
+	players[player_id].set_color(color)
+
 func player_offline(player_id: int, color := player_offline_color):
 	players[player_id].set_color(color)
 
