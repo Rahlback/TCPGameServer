@@ -1,11 +1,14 @@
 extends Node2D
 
-@export_category("Multiplayer boards")
+@export_category("Board setup")
 @export var number_of_simultaneous_games := 10
 @export var number_of_boards_per_group := 100
 @export var max_board_width := 15
 @export var max_board_height := 15
 @export var image_scale := 5
+
+@export_group("Game rules")
+@export var moves_until_game_over := 500
 
 @export_group("Player colors")
 @export var possible_colors: Array[Color]
@@ -216,10 +219,6 @@ func moves_received(board_group_id: int):
 	#_show_board(board_groups[0][0])
 	#print(updated_player_positions)
 	
-	GameServer.send_data_to_group(players_in_group, updated_player_positions, true)
-	#GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
-	board_group_moves[board_group_id].clear()
-	
 	move_counter += (1.0 / len(board_groups))
 	var move_delta_string = "0"
 	var move_time_delta_average = 0
@@ -228,6 +227,15 @@ func moves_received(board_group_id: int):
 		move_time_delta_average = move_time_delta
 	move_prev_time = Time.get_ticks_msec()
 	move_counter_ui.set_text("Moves: " + str(round(move_counter)) + " - " + str(round((move_prev_time - time_start) / move_counter)) + " ms/frame")
+	
+	if board_groups[board_group_id][0].get_number_of_moves() >= moves_until_game_over:
+		game_over(board_group_id)
+	else:
+		GameServer.send_data_to_group(players_in_group, updated_player_positions, true)
+		#GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
+	
+	board_group_moves[board_group_id].clear()
+	
 	
 
 ## Starts a game using the ids in [param players_list]. [br]

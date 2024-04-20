@@ -42,5 +42,10 @@ func add_board(initial_image:  Image, board_group : int):
 	board_groups[board_group].append(new_sprite)
 
 func update_board(new_image: Image, board_group : int, index: int):
+	if not board_group in board_groups:
+		add_board(new_image, board_group)
+	if index >= len(board_groups[board_group]):
+		add_board(new_image, board_group)
+		
 	board_groups[board_group][index].set_texture(ImageTexture.create_from_image(new_image))
 

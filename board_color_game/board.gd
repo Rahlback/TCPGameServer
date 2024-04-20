@@ -36,6 +36,8 @@ var starting_positions : Array[Vector2i]
 var movement = {"U": Vector2i(0, -1), "L": Vector2i(-1, 0),
 				"R": Vector2i(1, 0),  "D": Vector2i(0, 1)}
 
+var number_of_moves := 0
+
 var history : Array[HistoryItem] ## {
 var current_history_step = 0
 
@@ -293,6 +295,8 @@ func take_moves(player_moves: Dictionary, save_history := false):
 		var history_item = HistoryItem.new()
 		history_item.player_positions = player_positions.duplicate(true)
 		history.append(history_item)
+	
+	number_of_moves += 1
 
 func history_playback_setup():
 	board = starting_board
@@ -390,6 +394,9 @@ func get_width():
 	
 func get_height():
 	return board.get_height()
+
+func get_number_of_moves():
+	return number_of_moves
 	
 # TODO
 # Function to get updated state of the board 
