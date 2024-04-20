@@ -34,6 +34,7 @@ var zoom := Vector2(1, 1)
 
 # Onready items
 @onready var side_bar = $UI/SideBar
+@onready var move_counter_ui = $UI/MoveCounter
 
 
 # debug
@@ -214,8 +215,9 @@ func moves_received(board_group_id: int):
 		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
 	#print(updated_player_positions)
+	
 	GameServer.send_data_to_group(players_in_group, updated_player_positions, true)
-	GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
+	#GameServer.send_string_to_group(players_in_group, "SEND_MOVES")
 	board_group_moves[board_group_id].clear()
 	
 	move_counter += (1.0 / len(board_groups))
@@ -225,7 +227,7 @@ func moves_received(board_group_id: int):
 		move_time_delta = Time.get_ticks_msec() - move_prev_time
 		move_time_delta_average = move_time_delta
 	move_prev_time = Time.get_ticks_msec()
-	$MoveCounter.set_text("Moves: " + str(round(move_counter)) + " - " + str(round((move_prev_time - time_start) / move_counter)) + " ms/frame")
+	move_counter_ui.set_text("Moves: " + str(round(move_counter)) + " - " + str(round((move_prev_time - time_start) / move_counter)) + " ms/frame")
 	
 
 ## Starts a game using the ids in [param players_list]. [br]
@@ -236,6 +238,7 @@ func start_game(players_list: Array[int]):
 	
 	for i in range(players_list.size()):
 		player_setup[players_list[i]] = possible_colors[i]
+		side_bar.update_player_color(players_list[i], possible_colors[i])
 	print("Player setup: ", player_setup)
 	
 	var serialized_boards : Array[PackedByteArray]
@@ -318,8 +321,8 @@ func game_over(board_group_id: int):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	#print(board_groups[0][0].count_colors())
 	pass
-	
 	
 func _physics_process(delta):
 	pass
