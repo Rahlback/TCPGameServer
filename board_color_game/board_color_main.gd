@@ -61,7 +61,9 @@ func _ready():
 	GameServer.peer_disconnected.connect(_player_disconnected)
 	GameServer.peer_reconnected.connect(_player_reconnected)
 	GameServer.peer_message_received.connect(_receive_message)
-	GameServer.start()
+	if GameServer.start() != 0:
+		print("Failed to start game server")
+	
 
 
 var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
