@@ -39,6 +39,7 @@ signal peer_disconnected(id) ## Emitted when a client disconnects
 signal peer_reconnected(id) ## Emitted when a client reconnects
 signal peer_message_received(id, message)
 
+@onready var server_status = $CanvasLayer/ServerStatus
 
 func _ready():
 	pass
@@ -46,6 +47,15 @@ func _ready():
 ## Start the TCP server
 func start():
 	var result = server.listen(PORT)
+	var server_started : String
+	if result == 0:
+		server_status.push_color(Color.GREEN)
+		server_status.add_text("Server is online")
+		server_status.push_color(Color.WHITE)
+		server_status.add_text("\nListening on port: " + str(PORT))
+	else:
+		server_status.push_color(Color.RED)
+		server_status.add_text("Server is offline")
 	return result
 
 ## Sends a message as a string in ASCII. [br]
