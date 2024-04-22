@@ -184,6 +184,8 @@ func _register_peer(peer: StreamPeerTCP):
 		if not user_id_ss:
 			return
 		var user_id = user_id_ss.get_string() as int
+		if user_id < 100 or user_id > pow(2, 31):
+			return
 		print("User id: ", user_id, " X")
 		
 		regex.compile("(\\d|-|\\w+)+")
@@ -201,7 +203,8 @@ func _register_peer(peer: StreamPeerTCP):
 		if not _complete_register_peer(new_peer):
 			new_peer.tcp_stream.put_string("NOK")
 		else:
-			new_peer.tcp_stream.put_string("OK") # TODO: Maybe we don't need this
+			pass
+			# new_peer.tcp_stream.put_string("OK") # TODO: Maybe we don't need this
 			
 		return true
 
