@@ -7,7 +7,6 @@ script = ExtResource("1_3e0cg")
 PORT = 9079
 
 [node name="HeartBeatTimer" type="Timer" parent="."]
-wait_time = 5.0
 autostart = true
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]

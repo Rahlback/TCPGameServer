@@ -193,6 +193,7 @@ func _receive_player_message(player_id, message):
 			moves_received(players[player_id].board_group)
 	else:
 		lost_moves += 1
+		print_rich("Lost move from [color=black]" + str(player_id) + ". Message = [color=red]" + message)
 		$LostMoves.set_text("Lost moves: " + str(lost_moves))
 		GameServer.send_string(player_id, "RESEND_MOVE")
 	
