@@ -16,20 +16,26 @@ extends Node2D
 @export var default_height_min = 10
 @export var default_height_max = 100
 @export var number_of_seeds = 3000
+@export var base_tile : Image
 
 const NOISE_TEMPLATE = preload("res://board_color_game/noise_template.tscn")
 const NEW_NOISE_TEXTURE_2D = preload("res://board_color_game/new_noise_texture_2d.tres")
+const BASIC_FLOOR = preload("res://board_color_game/ui/dungeon_tiles/basic_floor.png")
 
 var player_colors : Dictionary ## {player_id: Color}
 var player_positions : Dictionary ## {player_id: Vector2i}
 var player_numbers : Dictionary
 var rev_player_numbers : Dictionary
+var player_floors : Dictionary
 
 var board : Image
 var starting_board : Image
 
 var cached_image_scale : int = -1
 var cached_scaled_image : Image = Image.new()
+var player_layer_image : Image
+
+var board_player_image_layer : Image
 
 var obstacles_serialized : PackedByteArray
 
@@ -42,7 +48,9 @@ var number_of_moves := 0
 var history : Array[HistoryItem] ## {
 var current_history_step = 0
 
-@onready var sprite_2d := $Sprite2D
+@onready var base_image := $base_image
+@onready var player_image = $player_image
+
 
 class HistoryItem:
 	var player_positions # [{player_id: pos, player_id: pos, ...}]
@@ -123,6 +131,7 @@ func setup_players(players: Dictionary):
 		rev_player_numbers[current_start_pos] = player_id
 	
 	starting_board = board.duplicate(true)
+	_update_images()
 	
 ## Gets the player number, i.e. player 1, 2, 3 or 4 from the player id.
 func get_player_number(player_id) -> int:
@@ -198,6 +207,7 @@ func validate_board(board_img: Image, start_pos: Vector2i, no_single_lanes = tru
 ## Returns an up-scaled image of the board image. 
 func get_scaled_image(scale: int = 5):
 	if cached_image_scale == scale:
+		#return
 		return _get_cached_scaled_image(scale)
 	
 	var scaled_image = Image.create(board.get_width() * scale, 
@@ -205,10 +215,23 @@ func get_scaled_image(scale: int = 5):
 	
 	var scaled_pixel = Image.create(scale, scale, false, Image.FORMAT_RGBA8)
 	var scaled_pixel_rect = Rect2i(0, 0, scale, scale)
+	var dungeon_floor = Image.load_from_file("res://board_color_game/ui/dungeon_tiles/basic_floor.png")
+	
 	for y in board.get_height():
 		for x in board.get_width():
-			scaled_pixel.fill(board.get_pixel(x, y))
-			scaled_image.blit_rect(scaled_pixel, scaled_pixel_rect, Vector2i(x * scale, y * scale))
+			var current_pixel_color = board.get_pixel(x, y)
+			var blit_image = dungeon_floor
+			if compare_colors(current_pixel_color, Color.WHITE):
+				blit_image = dungeon_floor
+			
+			elif compare_colors(current_pixel_color, Color.BLACK):
+				scaled_pixel.fill(Color.BLACK)
+				blit_image = scaled_pixel
+				#print(current_pixel_color)
+				#scaled_image.blit_rect(blit_image, scaled_pixel_rect, Vector2i(x * scale, y * scale))
+
+			scaled_image.blend_rect(blit_image, scaled_pixel_rect, Vector2i(x * scale, y * scale))
+			#scaled_pixel	
 	
 	var player_rect = Rect2i(0, 0, scale/2, scale/2)
 	var player_image = Image.create(scale/2, scale/2, false, Image.FORMAT_RGBA8)
@@ -243,6 +266,63 @@ func _get_cached_scaled_image(scale: int = 5):
 		scaled_image.blit_rect(player_image, player_rect, pos)
 	return scaled_image
 
+## Tiles are 32x32 pixels
+func _update_images():
+	if !base_image.is_visible():
+		_create_base_image()
+	if !player_image.is_visible():
+		_create_player_image()
+
+func _create_base_image():
+	var x_scale = base_tile.get_width()
+	var y_scale = base_tile.get_height()
+	var scaled_image = Image.create(board.get_width() * x_scale, 
+									board.get_height() * y_scale, false, Image.FORMAT_RGBA8)
+	
+	var black_box = Image.create(x_scale, y_scale, false, Image.FORMAT_RGBA8)
+	black_box.fill(Color.BLACK)
+	var scaled_pixel_rect = Rect2i(0, 0, x_scale, y_scale)
+	
+	for y in board.get_height():
+		for x in board.get_width():
+			var current_pixel_color = board.get_pixel(x, y)
+			var blit_image = base_tile
+			if compare_colors(current_pixel_color, Color.BLACK):
+				blit_image = black_box
+			
+			scaled_image.blit_rect(blit_image, scaled_pixel_rect, Vector2i(x * x_scale, y * y_scale))
+	
+	base_image.set_texture(ImageTexture.create_from_image(scaled_image))
+	base_image.show()
+
+func _create_player_image():
+	var x_scale = base_tile.get_width()
+	var y_scale = base_tile.get_height()
+	var scaled_image = Image.create(board.get_width() * x_scale, 
+									board.get_height() * y_scale, false, Image.FORMAT_RGBA8)
+	
+	var background_color = Color.WHITE
+	background_color.a = 0.0
+	
+	scaled_image.fill(background_color)
+	
+	var pixel = Image.create(x_scale, y_scale, false, Image.FORMAT_RGBA8)
+	var scaled_pixel_rect = Rect2i(0, 0, x_scale, y_scale)
+	for y in board.get_height():
+		for x in board.get_width():
+			var current_pixel_color = board.get_pixel(x, y)
+			if compare_colors(current_pixel_color, Color.BLACK):
+				continue
+			if compare_colors(current_pixel_color, Color.WHITE):
+				continue
+			
+			pixel.fill(current_pixel_color)
+			scaled_image.blit_rect(pixel, scaled_pixel_rect, Vector2i(x * x_scale, y * y_scale))
+	
+	player_image.set_texture(ImageTexture.create_from_image(scaled_image))
+	player_image.show()
+	player_layer_image = scaled_image
+	
 ## Returns true if the colors are the same
 func compare_colors(a: Color, b: Color):
 	return a.r == b.r and a.g == b.g and a.b == b.b
@@ -305,9 +385,9 @@ func take_moves(player_moves: Dictionary, save_history := false):
 	number_of_moves += 1
 	
 	if is_visible():
-		sprite_2d.set_texture(ImageTexture.create_from_image(get_scaled_image(15)))
+		base_image.set_texture(ImageTexture.create_from_image(get_scaled_image(15)))
 		
-	#if sprite_2d.is_node_ready():
+	#if base_image.is_node_ready():
 
 func history_playback_setup():
 	board = starting_board
