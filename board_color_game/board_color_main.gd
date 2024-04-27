@@ -19,13 +19,13 @@ extends Node2D
 
 var players : Dictionary
 var observers : Dictionary # {observer_id: bool active}
-var board_template = preload("res://board_color_game/board.gd")
+#var board_template = preload("res://board_color_game/board/board.gd")
+const BOARD = preload("res://board_color_game/board/board.tscn")
 var board_groups = []
 var board_group_queue: Array[int]
-
 var board_group_moves = []
 
-var boards : Array[Board] = []
+#var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
 var move_counter := 0.0
@@ -38,6 +38,7 @@ var zoom := Vector2(1, 1)
 # Onready items
 @onready var side_bar = $UI/SideBar
 @onready var move_counter_ui = $UI/MoveCounter
+@onready var board_holder = $BoardHolder
 
 
 # debug
@@ -69,15 +70,15 @@ func _ready():
 var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
 
 # This is for testing
-var current_board = 0
-func _after_ready():
-	var gen_start_time = Time.get_ticks_msec()
-	$Sprite2D.set_texture(ImageTexture.create_from_image(boards[current_board].get_scaled_image(20)))
-	#print("Time to scale image: ", Time.get_ticks_msec() - gen_start_time, " ms")
-
-func _show_board(board_group: int, board_index: int):
-	$BoardViewer.update_board(board_groups[board_index].get_scaled_image(image_scale), board_index)
-	#$Sprite2D.set_texture(ImageTexture.create_from_image(board.get_scaled_image(25)))
+#var current_board = 0
+#func _after_ready():
+	#var gen_start_time = Time.get_ticks_msec()
+	#$Sprite2D.set_texture(ImageTexture.create_from_image(boards[current_board].get_scaled_image(20)))
+	##print("Time to scale image: ", Time.get_ticks_msec() - gen_start_time, " ms")
+#
+#func _show_board(board_group: int, board_index: int):
+	#$BoardViewer.update_board(board_groups[board_index].get_scaled_image(image_scale), board_index)
+	##$Sprite2D.set_texture(ImageTexture.create_from_image(board.get_scaled_image(25)))
 
 # This is for testing
 var next_moves = {10: "R", 12: "L", 11: "R", 13: "L"}
@@ -261,7 +262,7 @@ func start_game(players_list: Array[int]):
 		var game_board_height_bytes : int = game_board.get_height() 
 		
 		var serialized_with_prelude : PackedByteArray
-		print("Game board width bytes ", game_board_width_bytes >> 8)
+		#print("Game board width bytes ", ceil(game_board_width_bytes / 8.0))
 		serialized_with_prelude.append(game_board_width_bytes >> 8)
 		serialized_with_prelude.append(game_board_width_bytes & 0xff)
 		serialized_with_prelude.append(game_board_height_bytes >> 8)
@@ -338,40 +339,47 @@ func _process(delta):
 func _physics_process(delta):
 	pass
 	
-func _generate_boards(number_of_boards: int = 1) -> Array[Board]:
-	var local_boards: Array[Board]
+func _generate_boards(number_of_boards: int = 1) -> Array:
+	var local_boards: Array
 	for x in range(number_of_boards):
 		var size = 0
-		var board: Board = board_template.new()
+		var board = BOARD.instantiate()
 		var width = 5 + randi() % max_board_width
 		var height = 5 + randi() % max_board_height
 		
+		
 		await board.generate_random_board(width, height)
 		local_boards.append(board)
+		if x > 0:
+			board.hide()
+		if board_holder.get_child_count() > 0:
+			var prev_board_pos = board_holder.get_child(-1).position
+			board.position = prev_board_pos + Vector2(200, 200)
+		board_holder.add_child(board)
 	return local_boards
 
 
 
 
 # This is testing stuff
-var rounds = 50
-var current_round = 0
-func _on_game_tick_timeout():
-	if current_round < rounds:
-		for player_id in next_moves:
-			next_moves[player_id] = valid_moves.pick_random()
-		for board in boards:
-			board.take_moves(next_moves)
-		_after_ready()
-	else:
-		boards[current_board].history_playback_setup()
-		$GameTick.stop()
-		$HistoryTick.start()
-	current_round += 1
-
-
-func _on_history_tick_timeout():
-	if boards[current_board].history_playback_step():
-		$HistoryTick.stop()
-	#print(boards[current_board].count_colors())
-	_after_ready()
+#var rounds = 50
+#var current_round = 0
+#func _on_game_tick_timeout():
+	#if current_round < rounds:
+		#for player_id in next_moves:
+			#next_moves[player_id] = valid_moves.pick_random()
+		#for board in boards:
+			#board.take_moves(next_moves)
+		#_after_ready()
+	#else:
+		#boards[current_board].history_playback_setup()
+		#$GameTick.stop()
+		#$HistoryTick.start()
+	#current_round += 1
+#
+#
+#func _on_history_tick_timeout():
+	#if boards[current_board].history_playback_step():
+		#$HistoryTick.stop()
+	##print(boards[current_board].count_colors())
+	#_after_ready()

@@ -1,3 +1,4 @@
+extends Node2D
 ## A game board. Width and height always needs to be even, if an odd width or
 ## height is supplied it will be rounded up to the nearest even number.
 ## [br]
@@ -8,7 +9,7 @@
 ## 1. The space is not a wall [br]
 ## 2. Another player is not moving into the same position [br]
 ## 3. Another player is not occupying the space. This can happen if a player becomes stuck.
-class_name Board
+#class_name Board
 
 @export var default_width_min = 10
 @export var default_width_max = 100
@@ -41,8 +42,13 @@ var number_of_moves := 0
 var history : Array[HistoryItem] ## {
 var current_history_step = 0
 
+@onready var sprite_2d := $Sprite2D
+
 class HistoryItem:
 	var player_positions # [{player_id: pos, player_id: pos, ...}]
+
+func _ready():
+	print("Board is ready!")
 
 ## Generates a board that is 4 player symmetrical.
 ## [br] Starts by generating a tile in the upper left corner, and mirrors
@@ -297,6 +303,11 @@ func take_moves(player_moves: Dictionary, save_history := false):
 		history.append(history_item)
 	
 	number_of_moves += 1
+	
+	if is_visible():
+		sprite_2d.set_texture(ImageTexture.create_from_image(get_scaled_image(15)))
+		
+	#if sprite_2d.is_node_ready():
 
 func history_playback_setup():
 	board = starting_board
