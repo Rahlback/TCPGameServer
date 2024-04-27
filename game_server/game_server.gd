@@ -62,7 +62,8 @@ func start():
 ## [param dict] can be changed to another dictionary, depending on which
 ## dictionary should be used, [member peers] or [member pending_peers]
 func send_string(id: int, message: String, target_dict = peers):
-	print("Send string to: ", id, ", message = ", message)
+	#print("Send string to: ", id, ", message = ", message)
+	Logger.trace(3, "Sending message to " + str(id) + ": " + message)
 	if id == 0:
 		for peer: Peer in target_dict:
 			peer.last_message_time = Time.get_ticks_msec()
