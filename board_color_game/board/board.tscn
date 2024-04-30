@@ -8,7 +8,6 @@ script = ExtResource("1_nfj51")
 base_tile = ExtResource("2_d1800")
 
 [node name="base_image" type="Sprite2D" parent="."]
-visible = false
 
 [node name="player_image" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0.356863)

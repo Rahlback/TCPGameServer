@@ -23,6 +23,7 @@ const NEW_NOISE_TEXTURE_2D = preload("res://board_color_game/new_noise_texture_2
 const BASIC_FLOOR = preload("res://board_color_game/ui/dungeon_tiles/basic_floor.png")
 
 var player_colors : Dictionary ## {player_id: Color}
+var rev_player_colors: Dictionary ## {Color: player_id}
 var player_positions : Dictionary ## {player_id: Vector2i}
 var player_numbers : Dictionary
 var rev_player_numbers : Dictionary
@@ -30,6 +31,11 @@ var player_floors : Dictionary
 
 var board : Image
 var starting_board : Image
+var player_board_tiles : Dictionary
+
+var board_data : Array[PackedByteArray]
+const WALL_TILE := 255
+const WHITE_TILE := 254
 
 var cached_image_scale : int = -1
 var cached_scaled_image : Image = Image.new()
@@ -104,6 +110,15 @@ func generate_random_board(width: int = 0, height: int = 0, main := true):
 	if not validate_board(board_image, player_pos):
 		board_image = await generate_random_board(width, height, false)
 	board = board_image
+	
+	for y in board_image.get_height():
+		var row : PackedByteArray
+		for x in board_image.get_width():
+			if compare_colors(board_image.get_pixel(x, y), Color.BLACK):
+				row.append(WALL_TILE)
+			else:
+				row.append(WHITE_TILE)
+		board_data.append(row)
 		
 	if main:
 		starting_positions.append(player_pos)
@@ -124,13 +139,31 @@ func setup_players(players: Dictionary):
 	
 	var current_start_pos = 0
 	for player_id in players:
+		var start_pos : Vector2i = starting_positions[current_start_pos]
+		board_data[start_pos.y][start_pos.x] = current_start_pos + 1
 		player_positions[player_id] = starting_positions[current_start_pos]
+		
+		# TODO: Remove from here when board_data works
+		rev_player_colors[players[player_id]] = player_id
 		board.set_pixelv(player_positions[player_id], player_colors[player_id])
+		# To here
+		
 		current_start_pos += 1
 		player_numbers[player_id] = current_start_pos
 		rev_player_numbers[current_start_pos] = player_id
+		
+		# Setup tiles
+		var new_board_tile := BASIC_FLOOR.duplicate()
+		for x in new_board_tile.get_width():
+			for y in new_board_tile.get_height():
+				var pixel = new_board_tile.get_pixel(x, y)
+				if compare_colors(Color8(36, 36, 36), pixel):
+					new_board_tile.set_pixel(x, y, players[player_id])
+		player_board_tiles[player_id] = new_board_tile
+			
 	
 	starting_board = board.duplicate(true)
+	
 	_update_images()
 	
 ## Gets the player number, i.e. player 1, 2, 3 or 4 from the player id.
@@ -222,14 +255,15 @@ func get_scaled_image(scale: int = 5):
 			var current_pixel_color = board.get_pixel(x, y)
 			var blit_image = dungeon_floor
 			if compare_colors(current_pixel_color, Color.WHITE):
-				blit_image = dungeon_floor
-			
+				pass#blit_image = dungeon_floor
 			elif compare_colors(current_pixel_color, Color.BLACK):
 				scaled_pixel.fill(Color.BLACK)
 				blit_image = scaled_pixel
 				#print(current_pixel_color)
 				#scaled_image.blit_rect(blit_image, scaled_pixel_rect, Vector2i(x * scale, y * scale))
-
+			else:	
+				var player_at_pixel = rev_player_colors[current_pixel_color]
+				player_board_tiles[player_at_pixel]
 			scaled_image.blend_rect(blit_image, scaled_pixel_rect, Vector2i(x * scale, y * scale))
 			#scaled_pixel	
 	
@@ -270,8 +304,8 @@ func _get_cached_scaled_image(scale: int = 5):
 func _update_images():
 	if !base_image.is_visible():
 		_create_base_image()
-	if !player_image.is_visible():
-		_create_player_image()
+	#if !player_image.is_visible():
+		#_create_player_image()
 
 func _create_base_image():
 	var x_scale = base_tile.get_width()
@@ -374,7 +408,11 @@ func take_moves(player_moves: Dictionary, save_history := false):
 			
 	
 	for player_id in next_player_pos:
+		var pos : Vector2i = next_player_pos[player_id]
+		board_data[pos.y][pos.x] = player_numbers[player_id]
+		# TODO: Remove from here
 		board.set_pixelv(next_player_pos[player_id], player_colors[player_id])
+		# To here
 		player_positions[player_id] = next_player_pos[player_id]
 		
 	if save_history:

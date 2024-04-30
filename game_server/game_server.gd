@@ -53,6 +53,10 @@ func start():
 		server_status.add_text("Server is online")
 		server_status.push_color(Color.WHITE)
 		server_status.add_text("\nListening on port: " + str(PORT))
+		for address: String in IP.get_local_addresses():
+			if address.begins_with("192") or address.begins_with("10"):
+				server_status.add_text("\n" + address)
+				
 	else:
 		server_status.push_color(Color.RED)
 		server_status.add_text("Server is offline")
