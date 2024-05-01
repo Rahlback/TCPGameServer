@@ -305,14 +305,6 @@ func _get_cached_scaled_image(scale: int = 5):
 	var scaled_image = Image.new()
 	scaled_image.copy_from(cached_scaled_image)
 
-	#var player_rect = Rect2i(0, 0, scale/2, scale/2)
-	#var player_image = Image.create(scale/2, scale/2, false, Image.FORMAT_RGBA8)
-	#player_image.fill(Color.CORAL)
-	#for player_id in player_positions:
-		#var pos = player_positions[player_id] * scale
-		#pos += Vector2i(scale/4, scale/4)
-		#scaled_image.blit_rect(player_image, player_rect, pos)
-		
 	var player_rect = Rect2i(0, 0, tile_width/2, tile_height/2)
 	var player_image = Image.create(tile_width/2, tile_height/2, false, Image.FORMAT_RGBA8)
 	player_image.fill(Color.CORAL)
@@ -489,6 +481,7 @@ func count_colors():
 ##		number_of_bytes_per_row
 ## ]
 func serialize_board():
+	# TODO Update to new board_data version
 	# width = 15
 	var bytes_per_row = ceil(board.get_width() / 8.0) # Get number 
 	var bits_per_row = board.get_width()

@@ -1,3 +1,6 @@
-[gd_scene format=3 uid="uid://dfh8tiw6h4jca"]
+[gd_scene load_steps=2 format=3 uid="uid://dfh8tiw6h4jca"]
+
+[ext_resource type="Script" path="res://board_color_game/board/board_view_group.gd" id="1_in0kn"]
 
 [node name="BoardViewGroup" type="Node2D"]
+script = ExtResource("1_in0kn")
