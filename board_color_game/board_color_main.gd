@@ -65,6 +65,10 @@ func _ready():
 	if GameServer.start() != 0:
 		print("Failed to start game server")
 	
+	# Fix bug when camera zoom is set in editor
+	# TODO: The zoom level should be moved to the camera.
+	zoom = $Camera.get_zoom()
+	
 
 
 var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
@@ -85,6 +89,7 @@ var next_moves = {10: "R", 12: "L", 11: "R", 13: "L"}
 var valid_moves = ["R", "L", "U", "D"]
 
 func _unhandled_input(event):
+	# TODO: The zoom functionality should be moved to the camera node
 	if event.is_action_pressed("CameraZoomIn"):
 		zoom += Vector2(0.05, 0.05)
 		zoom = zoom.clamp(Vector2(0.1, 0.1), Vector2(5, 5))
@@ -350,8 +355,8 @@ func _generate_boards(number_of_boards: int = 1) -> Array:
 		
 		await board.generate_random_board(width, height)
 		local_boards.append(board)
-		if x > 0:
-			board.hide()
+		#if x > 0:
+			#board.hide()
 		if board_holder.get_child_count() > 0:
 			var prev_board_pos = board_holder.get_child(-1).position
 			board.position = prev_board_pos + Vector2(200, 200)

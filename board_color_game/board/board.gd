@@ -38,7 +38,7 @@ const WALL_TILE := 255
 const WHITE_TILE := 254
 
 var cached_image_scale : int = -1
-var cached_scaled_image : Image = Image.new()
+var cached_scaled_image : Image
 var player_layer_image : Image
 
 var board_player_image_layer : Image
@@ -55,7 +55,7 @@ var history : Array[HistoryItem] ## {
 var current_history_step = 0
 
 @onready var base_image := $base_image
-@onready var player_image = $player_image
+#@onready var player_image = $player_image
 
 
 class HistoryItem:
@@ -164,9 +164,8 @@ func setup_players(players: Dictionary):
 		player_board_tiles[player_id] = new_board_tile
 
 	starting_board = board.duplicate(true)
-	
-	#_update_images()
-	
+
+
 ## Gets the player number, i.e. player 1, 2, 3 or 4 from the player id.
 func get_player_number(player_id) -> int:
 	if player_id in rev_player_numbers:
@@ -240,9 +239,10 @@ func validate_board(board_img: Image, start_pos: Vector2i, no_single_lanes = tru
 	
 ## Returns an up-scaled image of the board image. 
 func get_scaled_image(scale: int = 5):
+	if cached_scaled_image:
+		return _get_cached_scaled_image()
 	
-	var scaled_pixel = Image.create(scale, scale, false, Image.FORMAT_RGBA8)
-	var dungeon_floor := Image.load_from_file("res://board_color_game/ui/dungeon_tiles/basic_floor.png")
+	var dungeon_floor := BASIC_FLOOR
 	
 	var tile_width = dungeon_floor.get_width()
 	var tile_height = dungeon_floor.get_height()
@@ -274,62 +274,57 @@ func get_scaled_image(scale: int = 5):
 		x = 0
 		y += tile_height
 	
-	print(len(board_data), " : ", scaled_image.get_height())
+	cached_scaled_image = scaled_image.duplicate()
+	#cached_scaled_image.copy_from(scal6ed_image)
+	var player_rect = Rect2i(0, 0, tile_width/2, tile_height/2)
+	var player_image = Image.create(tile_width/2, tile_height/2, false, Image.FORMAT_RGBA8)
+	player_image.fill(Color.CORAL)
+	for player_id in player_positions:
+		var pos = player_positions[player_id] * tile_width
+		pos += Vector2i(tile_width/4, tile_height/4)
+		scaled_image.blit_rect(player_image, player_rect, pos)
 	
-	#for y in board.get_height():
-		#for x in board.get_width():
-			#var current_pixel_color = board.get_pixel(x, y)
-			#var blit_image = dungeon_floor
-			#if compare_colors(current_pixel_color, Color.WHITE):
-				#pass#blit_image = dungeon_floor
-			#elif compare_colors(current_pixel_color, Color.BLACK):
-				#scaled_pixel.fill(Color.BLACK)
-				#blit_image = scaled_pixel
-				##print(current_pixel_color)
-				##scaled_image.blit_rect(blit_image, scaled_pixel_rect, Vector2i(x * scale, y * scale))
-			#else:	
-				#var player_at_pixel = rev_player_colors[current_pixel_color]
-				#player_board_tiles[player_at_pixel]
-			#scaled_image.blend_rect(blit_image, scaled_pixel_rect, Vector2i(x * scale, y * scale))
-			##scaled_pixel	
-	
-	#var player_rect = Rect2i(0, 0, tile_width/2, tile_height/2)
-	#var player_image = Image.create(tile_width/2, tile_height/2, false, Image.FORMAT_RGBA8)
-	#player_image.fill(Color.CORAL)
-	#for player_id in player_positions:
-		#var pos = player_positions[player_id] * tile_width
-		#pos += Vector2i(tile_width/4, tile_height/4)
-		#scaled_image.blit_rect(player_image, player_rect, pos)
-	scaled_image.save_png("./xx.png")
+	#scaled_image.save_png("./test_images/" + str(randi()) + ".png")
 	return scaled_image
 
 func _get_cached_scaled_image(scale: int = 5):
-	var scaled_pixel = Image.create(scale, scale, false, Image.FORMAT_RGBA8)
-	var scaled_pixel_rect = Rect2i(0, 0, scale, scale)
+	#var scaled_pixel = Image.create(scale, scale, false, Image.FORMAT_RGBA8)
+	
+	var tile_width = BASIC_FLOOR.get_width()
+	var tile_height = BASIC_FLOOR.get_height()
+	var scaled_pixel_rect = Rect2i(0, 0, tile_width, tile_height)
 	
 	for player_id in player_colors:
-		var pos = player_positions[player_id] * scale
-		scaled_pixel.fill(player_colors[player_id])
-		cached_scaled_image.blit_rect(scaled_pixel, scaled_pixel_rect, Vector2i(pos[0], pos[1]))
+		var pos = player_positions[player_id]
+		pos.x *= tile_width
+		pos.y *= tile_height
+		
+		cached_scaled_image.blit_rect(player_board_tiles[player_id], 
+									  scaled_pixel_rect, Vector2i(pos[0], pos[1]))
 	
 	var scaled_image = Image.new()
 	scaled_image.copy_from(cached_scaled_image)
-								
-	var player_rect = Rect2i(0, 0, scale/2, scale/2)
-	var player_image = Image.create(scale/2, scale/2, false, Image.FORMAT_RGBA8)
+
+	#var player_rect = Rect2i(0, 0, scale/2, scale/2)
+	#var player_image = Image.create(scale/2, scale/2, false, Image.FORMAT_RGBA8)
+	#player_image.fill(Color.CORAL)
+	#for player_id in player_positions:
+		#var pos = player_positions[player_id] * scale
+		#pos += Vector2i(scale/4, scale/4)
+		#scaled_image.blit_rect(player_image, player_rect, pos)
+		
+	var player_rect = Rect2i(0, 0, tile_width/2, tile_height/2)
+	var player_image = Image.create(tile_width/2, tile_height/2, false, Image.FORMAT_RGBA8)
 	player_image.fill(Color.CORAL)
 	for player_id in player_positions:
-		var pos = player_positions[player_id] * scale
-		pos += Vector2i(scale/4, scale/4)
+		var pos = player_positions[player_id] * tile_width
+		pos += Vector2i(tile_width/4, tile_height/4)
 		scaled_image.blit_rect(player_image, player_rect, pos)
 	return scaled_image
 
 ## Tiles are 32x32 pixels
-#func _update_images():
-	#if !base_image.is_visible():
-		#_create_base_image()
-	#if !player_image.is_visible():
-		#_create_player_image()
+func _update_images():
+	base_image.set_texture(ImageTexture.create_from_image(get_scaled_image()))
 
 func _create_base_image():
 	var x_scale = base_tile.get_width()
@@ -377,8 +372,8 @@ func _create_player_image():
 			pixel.fill(current_pixel_color)
 			scaled_image.blit_rect(pixel, scaled_pixel_rect, Vector2i(x * x_scale, y * y_scale))
 	
-	player_image.set_texture(ImageTexture.create_from_image(scaled_image))
-	player_image.show()
+	#player_image.set_texture(ImageTexture.create_from_image(scaled_image))
+	#player_image.show()
 	player_layer_image = scaled_image
 	
 ## Returns true if the colors are the same
@@ -449,9 +444,7 @@ func take_moves(player_moves: Dictionary, save_history := false):
 	number_of_moves += 1
 	
 	if is_visible():
-		var img_texture = ImageTexture.create_from_image(get_scaled_image(15))
-		print(img_texture.get_height())
-		base_image.set_texture(img_texture)
+		_update_images()
 		
 	#if base_image.is_node_ready():
 
@@ -561,3 +554,7 @@ func get_number_of_moves():
 # Maybe just have an observer instead?
 # Maybe if there is a flag so that the memory consumption isn't too high
 
+
+
+func _on_base_image_ready():
+	call_deferred("_update_images")
