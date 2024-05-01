@@ -4,3 +4,11 @@
 
 [node name="BoardViewGroup" type="Node2D"]
 script = ExtResource("1_in0kn")
+
+[node name="Panel" type="Panel" parent="."]
+offset_left = -535.0
+offset_top = -266.0
+offset_right = 582.0
+offset_bottom = 343.0
+
+[node name="Boards" type="Node2D" parent="."]

@@ -4,6 +4,7 @@
 [ext_resource type="Image" uid="uid://5db5sm6ylk5f" path="res://board_color_game/ui/dungeon_tiles/basic_floor.png" id="2_d1800"]
 
 [node name="Board" type="Node2D"]
+visible = false
 script = ExtResource("1_nfj51")
 base_tile = ExtResource("2_d1800")
 

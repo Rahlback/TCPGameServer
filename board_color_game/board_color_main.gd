@@ -3,6 +3,9 @@ extends Node2D
 @export_category("Board setup")
 @export var number_of_simultaneous_games := 10
 @export var number_of_boards_per_group := 100
+@export_group("Board size")
+@export var min_board_width := 5
+@export var min_board_height := 5
 @export var max_board_width := 15
 @export var max_board_height := 15
 @export var image_scale := 5
@@ -21,10 +24,11 @@ var players : Dictionary
 var observers : Dictionary # {observer_id: bool active}
 #var board_template = preload("res://board_color_game/board/board.gd")
 const BOARD = preload("res://board_color_game/board/board.tscn")
+const BOARD_VIEW_GROUP = preload("res://board_color_game/board/board_view_group.tscn")
+
 var board_groups = []
 var board_group_queue: Array[int]
 var board_group_moves = []
-
 #var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
@@ -222,8 +226,8 @@ func moves_received(board_group_id: int):
 			player_dict[player_id] = board_group_moves[board_group_id][player_id][board_i]
 		
 		board_groups[board_group_id][board_i].take_moves(player_dict)
-		if show_boards:
-			$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_group_id, board_i)
+		#if show_boards:
+			#$BoardViewer.update_board(board_groups[board_group_id][board_i].get_scaled_image(image_scale), board_group_id, board_i)
 		updated_player_positions += board_groups[board_group_id][board_i].get_serialized_player_number_positions()
 	#_show_board(board_groups[0][0])
 	#print(updated_player_positions)
@@ -235,7 +239,9 @@ func moves_received(board_group_id: int):
 		move_time_delta = Time.get_ticks_msec() - move_prev_time
 		move_time_delta_average = move_time_delta
 	move_prev_time = Time.get_ticks_msec()
-	move_counter_ui.set_text("Moves: " + str(round(move_counter)) + " - " + str(round((move_prev_time - time_start) / move_counter)) + " ms/frame")
+	move_counter_ui.set_text("Moves: " + str(round(move_counter)) + 
+							 " - " + str(round((move_prev_time - time_start) / move_counter)) 
+							 + " ms/frame")
 	
 	if board_groups[board_group_id][0].get_number_of_moves() >= moves_until_game_over:
 		game_over(board_group_id)
@@ -346,21 +352,23 @@ func _physics_process(delta):
 	
 func _generate_boards(number_of_boards: int = 1) -> Array:
 	var local_boards: Array
+	var new_board_group = BOARD_VIEW_GROUP.instantiate()
+	board_holder.add_child(new_board_group)
 	for x in range(number_of_boards):
-		var size = 0
 		var board = BOARD.instantiate()
-		var width = 5 + randi() % max_board_width
-		var height = 5 + randi() % max_board_height
-		
+		var width = max(min_board_width, randi() % max_board_width)
+		var height = max(min_board_height, randi() % max_board_height)
 		
 		await board.generate_random_board(width, height)
 		local_boards.append(board)
-		#if x > 0:
-			#board.hide()
-		if board_holder.get_child_count() > 0:
-			var prev_board_pos = board_holder.get_child(-1).position
-			board.position = prev_board_pos + Vector2(200, 200)
-		board_holder.add_child(board)
+
+		new_board_group.add_board(board)
+	
+	if board_holder.get_child_count() > 0:
+		var prev_board_pos = board_holder.get_child(-1).position
+		new_board_group.position = prev_board_pos + Vector2(200, 200)
+		
+	
 	return local_boards
 
 
