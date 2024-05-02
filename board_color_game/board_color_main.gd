@@ -365,9 +365,9 @@ func _generate_boards(number_of_boards: int = 1) -> Array:
 		new_board_group.add_board(board)
 	
 	if board_holder.get_child_count() > 1:
-		# TODO Add calculation of where to put this board
-		var prev_board_pos = board_holder.get_child(-1).position
+		var prev_board_pos = board_holder.get_children().back().position
 		new_board_group.position = prev_board_pos + new_board_group.get_size()
+		board_holder.arrange_children()
 		
 	
 	return local_boards

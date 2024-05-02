@@ -20,13 +20,29 @@ grow_vertical = 2
 
 [node name="MouseOn" type="Label" parent="."]
 visible = false
-offset_left = -318.0
-offset_top = -357.0
-offset_right = 22.0
-offset_bottom = -328.0
+offset_left = -320.0
+offset_top = -319.0
+offset_right = 20.0
+offset_bottom = -290.0
 text = "The mouse is on the panel"
+
+[node name="NavigationButtons" type="HBoxContainer" parent="."]
+offset_left = -318.0
+offset_top = 280.0
+offset_right = -278.0
+offset_bottom = 320.0
+
+[node name="SwitchLeft" type="Button" parent="NavigationButtons"]
+layout_mode = 2
+text = "<"
+
+[node name="SwitchRight" type="Button" parent="NavigationButtons"]
+layout_mode = 2
+text = ">"
 
 [node name="Boards" type="Node2D" parent="."]
 
 [connection signal="mouse_entered" from="BoardPanel" to="." method="_on_panel_mouse_entered"]
 [connection signal="mouse_exited" from="BoardPanel" to="." method="_on_panel_mouse_exited"]
+[connection signal="pressed" from="NavigationButtons/SwitchLeft" to="." method="_on_switch_left_pressed"]
+[connection signal="pressed" from="NavigationButtons/SwitchRight" to="." method="_on_switch_right_pressed"]

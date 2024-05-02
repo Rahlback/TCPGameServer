@@ -32,6 +32,8 @@ var player_floors : Dictionary
 var board : Image
 var starting_board : Image
 var player_board_tiles : Dictionary
+var board_width : int
+var board_height : int
 
 var board_data : Array[PackedByteArray]
 const WALL_TILE := 255
@@ -127,6 +129,9 @@ func generate_random_board(width: int = 0, height: int = 0, main := true):
 		starting_positions.append(Vector2i(player_pos.x, height - 1 - player_pos.y))
 		starting_positions.append(Vector2i(width - 1 - player_pos.x, player_pos.y))
 		starting_positions.append(Vector2i(width - 1 - player_pos.x, height - 1 - player_pos.y))
+		
+		board_width = len(board_data[0])
+		board_height = len(board_data)
 
 	return board
 
@@ -314,6 +319,11 @@ func _get_cached_scaled_image(scale: int = 5):
 		scaled_image.blit_rect(player_image, player_rect, pos)
 	return scaled_image
 
+func _redraw_image():
+	cached_scaled_image = null
+	_update_images()
+	
+
 ## Tiles are 32x32 pixels
 func _update_images():
 	base_image.set_texture(ImageTexture.create_from_image(get_scaled_image()))
@@ -374,13 +384,11 @@ func compare_colors(a: Color, b: Color):
 
 
 func is_wall(pos: Vector2i):
-	# TODO Replace with board_data check
-	return compare_colors(board.get_pixelv(pos), Color.BLACK)
+	return board_data[pos.y][pos.x] == WALL_TILE
 
 func is_oob(pos: Vector2i):
-	# TODO Replace board with board_data
-	var oob = pos.x < 0 or pos.x >= board.get_width()
-	oob = oob or (pos.y < 0 or pos.y >= board.get_height())
+	var oob = pos.x < 0 or pos.x >= board_width
+	oob = oob or (pos.y < 0 or pos.y >= board_height)
 	return oob
 
 ## Simulates the next step. Returns a list of new player positions. [br]
@@ -423,9 +431,6 @@ func take_moves(player_moves: Dictionary, save_history := false):
 	for player_id in next_player_pos:
 		var pos : Vector2i = next_player_pos[player_id]
 		board_data[pos.y][pos.x] = player_numbers[player_id]
-		# TODO: Remove from here
-		board.set_pixelv(next_player_pos[player_id], player_colors[player_id])
-		# To here
 		player_positions[player_id] = next_player_pos[player_id]
 		
 	if save_history:
@@ -523,12 +528,29 @@ func serialize_board():
 	return obstacles_serialized
 	
 		
-	
+## Returns a serialized version of the complete board, including player tiles.
+## [br]
+## The width gives the number of bytes needed for a single row, and the height
+## specifies how many rows this data set will contain.
+## Format: [br]
+## [ [br]
+## 	1 byte: width,
+## 	1 byte: height,
+## 		[[br] width number of bytes: A single row ]
+## 
+func get_full_board_serialized():
+	var serialized_board : PackedByteArray
+	serialized_board.append(board_width)
+	serialized_board.append(board_height)
+	for row in board_data:
+		serialized_board.append_array(row)
+	return serialized_board
+
 ## Returns the board layout, only including white spaces (zeroes) and walls (ones)
 func get_obstacle_serialized():
 	if obstacles_serialized:
 		return obstacles_serialized
-	
+
 	else:
 		return serialize_board()
 		
@@ -547,7 +569,10 @@ func get_number_of_moves():
 # Maybe just have an observer instead?
 # Maybe if there is a flag so that the memory consumption isn't too high
 
-
-
 func _on_base_image_ready():
-	call_deferred("_update_images")
+	#call_deferred("_update_images")
+	pass
+
+
+func _on_visibility_changed():
+	call_deferred("_redraw_image")

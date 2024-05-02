@@ -10,4 +10,5 @@ base_tile = ExtResource("2_d1800")
 
 [node name="base_image" type="Sprite2D" parent="."]
 
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]
 [connection signal="ready" from="base_image" to="." method="_on_base_image_ready"]
