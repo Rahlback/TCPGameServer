@@ -352,7 +352,7 @@ func _physics_process(delta):
 	
 func _generate_boards(number_of_boards: int = 1) -> Array:
 	var local_boards: Array
-	var new_board_group = BOARD_VIEW_GROUP.instantiate()
+	var new_board_group := BOARD_VIEW_GROUP.instantiate()
 	board_holder.add_child(new_board_group)
 	for x in range(number_of_boards):
 		var board = BOARD.instantiate()
@@ -364,9 +364,10 @@ func _generate_boards(number_of_boards: int = 1) -> Array:
 
 		new_board_group.add_board(board)
 	
-	if board_holder.get_child_count() > 0:
+	if board_holder.get_child_count() > 1:
+		# TODO Add calculation of where to put this board
 		var prev_board_pos = board_holder.get_child(-1).position
-		new_board_group.position = prev_board_pos + Vector2(200, 200)
+		new_board_group.position = prev_board_pos + new_board_group.get_size()
 		
 	
 	return local_boards

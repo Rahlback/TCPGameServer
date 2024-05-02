@@ -5,10 +5,28 @@
 [node name="BoardViewGroup" type="Node2D"]
 script = ExtResource("1_in0kn")
 
-[node name="Panel" type="Panel" parent="."]
-offset_left = -535.0
-offset_top = -266.0
-offset_right = 582.0
-offset_bottom = 343.0
+[node name="BoardPanel" type="Panel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -325.0
+offset_top = -325.0
+offset_right = 325.0
+offset_bottom = 325.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MouseOn" type="Label" parent="."]
+visible = false
+offset_left = -318.0
+offset_top = -357.0
+offset_right = 22.0
+offset_bottom = -328.0
+text = "The mouse is on the panel"
 
 [node name="Boards" type="Node2D" parent="."]
+
+[connection signal="mouse_entered" from="BoardPanel" to="." method="_on_panel_mouse_entered"]
+[connection signal="mouse_exited" from="BoardPanel" to="." method="_on_panel_mouse_exited"]
