@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dfh8tiw6h4jca"]
+[gd_scene load_steps=3 format=3 uid="uid://dfh8tiw6h4jca"]
 
 [ext_resource type="Script" path="res://board_color_game/board/board_view_group.gd" id="1_in0kn"]
+[ext_resource type="PackedScene" uid="uid://bjdh12g1j88l" path="res://board_color_game/board/board_stats.tscn" id="2_wva4b"]
 
 [node name="BoardViewGroup" type="Node2D"]
 script = ExtResource("1_in0kn")
@@ -42,7 +43,18 @@ text = ">"
 
 [node name="Boards" type="Node2D" parent="."]
 
+[node name="BoardStats" parent="." instance=ExtResource("2_wva4b")]
+offset_left = 71.0
+offset_top = -404.0
+offset_right = 71.0
+offset_bottom = -404.0
+
+[node name="StatUpdateTimer" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
 [connection signal="mouse_entered" from="BoardPanel" to="." method="_on_panel_mouse_entered"]
 [connection signal="mouse_exited" from="BoardPanel" to="." method="_on_panel_mouse_exited"]
 [connection signal="pressed" from="NavigationButtons/SwitchLeft" to="." method="_on_switch_left_pressed"]
 [connection signal="pressed" from="NavigationButtons/SwitchRight" to="." method="_on_switch_right_pressed"]
+[connection signal="timeout" from="StatUpdateTimer" to="." method="_on_stat_update_timer_timeout"]

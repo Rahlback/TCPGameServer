@@ -25,9 +25,11 @@ const BASIC_FLOOR = preload("res://board_color_game/ui/dungeon_tiles/basic_floor
 var player_colors : Dictionary ## {player_id: Color}
 var rev_player_colors: Dictionary ## {Color: player_id}
 var player_positions : Dictionary ## {player_id: Vector2i}
-var player_numbers : Dictionary
-var rev_player_numbers : Dictionary
+var player_numbers : Dictionary ## {player_id: player_number}
+var rev_player_numbers : Dictionary ## {player_number: player_id}
 var player_floors : Dictionary
+var player_scores : Dictionary
+var stats : Array[Dictionary] ## Move index: {player_id: score, ...}
 
 var board : Image
 var starting_board : Image
@@ -146,6 +148,7 @@ func setup_players(players: Dictionary):
 	
 	var current_start_pos = 0
 	for player_id in players:
+		player_scores[player_id] = 1
 		var start_pos : Vector2i = starting_positions[current_start_pos]
 		board_data[start_pos.y][start_pos.x] = current_start_pos + 1
 		player_positions[player_id] = starting_positions[current_start_pos]
@@ -167,7 +170,8 @@ func setup_players(players: Dictionary):
 				if compare_colors(Color8(36, 36, 36), pixel):
 					new_board_tile.set_pixel(x, y, players[player_id])
 		player_board_tiles[player_id] = new_board_tile
-
+		
+	stats.append(player_scores.duplicate(true))
 	starting_board = board.duplicate(true)
 
 
@@ -430,8 +434,17 @@ func take_moves(player_moves: Dictionary, save_history := false):
 	
 	for player_id in next_player_pos:
 		var pos : Vector2i = next_player_pos[player_id]
+		
+		var tile_number = board_data[pos.y][pos.x]
+		if tile_number != WALL_TILE and tile_number != WHITE_TILE:
+			player_scores[rev_player_numbers[tile_number]] -= 1
+		
 		board_data[pos.y][pos.x] = player_numbers[player_id]
 		player_positions[player_id] = next_player_pos[player_id]
+		
+		player_scores[player_id] += 1
+	
+	stats.append(player_scores.duplicate(true))
 		
 	if save_history:
 		var history_item = HistoryItem.new()
@@ -562,7 +575,12 @@ func get_height():
 
 func get_number_of_moves():
 	return number_of_moves
+
+func get_stats():
+	return stats
 	
+func get_player_colors():
+	return player_colors
 # TODO
 # Function to get updated state of the board 
 # Save history of the players? In order to be able to repeat it.
