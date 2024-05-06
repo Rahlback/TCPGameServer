@@ -1,10 +1,12 @@
 extends Control
 
-
+@export var line_width := 3
+@export var anti_aliasing_enabled := true
 
 var points : Dictionary ## Dictionary{Line_id: Array[int], ...}
 
-var draw_points : Dictionary ## {line_id: Points, ...}
+var draw_points : Dictionary ## {line_id: PackedVector2Array, ...}
+var draw_colors : Dictionary ## {line_id: PackedColorArray, ...}
 
 var max_points := 0
 
@@ -37,6 +39,7 @@ func add_point(val: int, line_id):
 		points[line_id].append(val)
 		max_points = max(points[line_id], max_points)
 
+## [line_colors_inp] => Dictionary {line_id: Color, ...}
 func draw_graph(line_colors_inp = null):
 	# Calculate pixels per x component
 	var pixel_step_x = width / max_points
@@ -46,34 +49,40 @@ func draw_graph(line_colors_inp = null):
 	draw_points.clear()
 	for line_id in points:
 		# Points = {Line_id: Array[int], ...}
-		var line_points = Points.new()
-		if line_colors_inp:
-			if line_id in line_colors_inp:
-				line_points.color = line_colors_inp[line_id]
+		var line_points : PackedVector2Array = []
+		var point_colors : PackedColorArray = []
+		#if line_colors_inp:
+			#if line_id in line_colors_inp:
+				#line_points.color = line_colors_inp[line_id]
 		var x = 0.0
 		for p in points[line_id]:
 			#print(p)
 			# p = int, y value
-			line_points.points.append(Vector2(x * pixel_step_x, -p * pixel_step_y))
+			line_points.append(Vector2(x * pixel_step_x, -p * pixel_step_y))
+			if line_id in line_colors_inp:
+				point_colors.append(line_colors_inp[line_id])
 			x += 1
 		draw_points[line_id] = line_points
-		print(line_points.points)
+		draw_colors[line_id] = point_colors
+
 	
 	queue_redraw()
 
 func _draw():
 	for line in draw_points:
-		
-		line = draw_points[line]
-		if len(line.points) <= 1:
+		if len(draw_points[line]) <= 1:
 			continue
-		
-		var x_next = 1
-		for x in len(line.points) - 1:
-			print_debug(line.points[x], " -> ", line.points[x_next])
-			draw_line(line.points[x], line.points[x_next],
-					 line.color, 3, true)
-			x_next += 1
+
+		if line in draw_colors:
+			draw_polyline_colors(draw_points[line], 
+								 draw_colors[line], 
+								 line_width, 
+								 anti_aliasing_enabled)
+		else:
+			draw_polyline(draw_points[line], 
+								 Color.BLACK, 
+								 line_width, 
+								 anti_aliasing_enabled)
 
 
 
