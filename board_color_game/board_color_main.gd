@@ -17,7 +17,9 @@ extends Node2D
 @export var possible_colors: Array[Color]
 
 @export_group("Debug")
-@export var show_boards := true
+
+## Deprecated. Displays all boards being played
+@export var show_boards := false 
 
 
 var players : Dictionary
@@ -26,9 +28,10 @@ var observers : Dictionary # {observer_id: bool active}
 const BOARD = preload("res://board_color_game/board/board.tscn")
 const BOARD_VIEW_GROUP = preload("res://board_color_game/board/board_view_group.tscn")
 
-var board_groups = []
+var board_groups : Dictionary
 var board_group_queue: Array[int]
-var board_group_moves = []
+var board_group_moves : Dictionary
+var board_group_id_latest = -1
 #var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
@@ -54,6 +57,8 @@ class Player:
 	var disconnect_time : int = 0
 	var observers : Array[int] # A list of all observers
 	var board_group : int = -1
+	
+	var score = 0
 
 	func _init(player_name: String):
 		self.player_name = player_name
@@ -156,14 +161,14 @@ func _player_disconnected(player_id: int):
 	#players[player_id].player_label.hide()
 	if player_id in board_group_queue:
 		board_group_queue.erase(player_id)
-		
-	if players[player_id].board_group >= 0:
-		game_over(players[player_id].board_group)
-			
-		
+
 	players[player_id].active = false
 	players[player_id].disconnect_time = Time.get_ticks_msec()
 	side_bar.player_offline(player_id)
+
+	if players[player_id].board_group >= 0: # In case this player wasn't part of a group
+		game_over(players[player_id].board_group)
+		
 	return
 	players[player_id].player_label.clear()
 	players[player_id].player_label.push_color(Color.RED)
@@ -190,7 +195,8 @@ func _receive_player_message(player_id, message):
 	#print("Received message from %s: %s. len=%s" % [player_id, message, len(message)])
 	#print("Received message from %s: len=%s" % [player_id, len(message)])
 	#print("	Part of group: %s" % players[player_id].board_group)
-	
+	if players[player_id].active == false:
+		print_debug("Player is inactive, but sent a message!: ", player_id)
 	var board_group_id = players[player_id].board_group
 	
 	if board_group_id < 0:
@@ -321,13 +327,17 @@ func start_game(players_list: Array[int]):
 		player_number += 1
 		GameServer.send_data(player, message) 
 	
-	board_groups.append(game_boards)
+	var next_board_group_id = board_group_id_latest + 1
+	board_group_id_latest = next_board_group_id
+	board_groups[next_board_group_id] = game_boards
+	#board_groups.append(game_boards)
 	
 	# Send moves
 	var group_moves : Dictionary
 	for player in players_list:
-		players[player].board_group = len(board_groups)-1
-	board_group_moves.append(group_moves)
+		players[player].board_group = next_board_group_id
+	board_group_moves[next_board_group_id] = group_moves
+	#board_group_moves.append(group_moves)
 	
 	GameServer.send_string_to_group(players_list, "SETUP_COMPLETE_SEND_MOVES")
 	# Development purposes
@@ -338,9 +348,19 @@ func start_game(players_list: Array[int]):
 	time_start = Time.get_ticks_msec()
 
 func game_over(board_group_id: int):
+	# TODO: Gather statistics and add to the players
+	# TODO: 
+	if not board_groups[board_group_id]:
+		return
 	for player_id in board_groups[board_group_id][0].player_colors:
 		if players[player_id].active:
 			GameServer.send_string(player_id, "GAME_OVER")
+			
+			add_player_to_queue(player_id)
+	
+	for board: Node in board_groups[board_group_id]:
+		board.queue_free()
+	board_groups[board_group_id].clear()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

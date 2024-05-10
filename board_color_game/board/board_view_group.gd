@@ -26,6 +26,11 @@ func hide_showing_board():
 	
 func add_board(board: Node2D):
 	boards.add_child(board)
+	board.tree_exited.connect(_remove_board.bind(board))
+
+func _remove_board(board: Node2D):
+	if boards.get_child_count() == 0:
+		queue_free()
 
 func get_size() -> Vector2:
 	return board_panel.size
@@ -76,3 +81,4 @@ func _on_stat_update_timer_timeout():
 	
 	for player in d_players:
 		player_chart.add_plot(str(player), d_players[player], d_colors[player])
+

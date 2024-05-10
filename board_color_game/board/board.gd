@@ -21,8 +21,10 @@ extends Node2D
 const NOISE_TEMPLATE = preload("res://board_color_game/noise_template.tscn")
 const NEW_NOISE_TEXTURE_2D = preload("res://board_color_game/new_noise_texture_2d.tres")
 const BASIC_FLOOR = preload("res://board_color_game/ui/dungeon_tiles/basic_floor.png")
-
-var player_colors : Dictionary ## {player_id: Color}
+ 
+## A dictionary containing each player color in the form {player_id: Color} [br]
+## This dictionary is also used to retrieve the players that are playing on this board
+var player_colors : Dictionary
 var rev_player_colors: Dictionary ## {Color: player_id}
 var player_positions : Dictionary ## {player_id: Vector2i}
 var player_numbers : Dictionary ## {player_id: player_number}
