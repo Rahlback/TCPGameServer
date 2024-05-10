@@ -578,6 +578,9 @@ func get_number_of_moves():
 
 func get_stats():
 	return stats
+
+func get_stats_last_n_items(n: int):
+	return stats.slice(-n)
 	
 func get_player_colors():
 	return player_colors

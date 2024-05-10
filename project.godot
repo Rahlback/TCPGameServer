@@ -13,7 +13,6 @@ config_version=5
 config/name="TCPGameServer"
 run/main_scene="res://board_color_game/board_color_main.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
-run/max_fps=60
 config/icon="res://icon.svg"
 
 [autoload]
@@ -24,6 +23,10 @@ Logger="*res://logger/Logger.tscn"
 [display]
 
 window/vsync/vsync_mode=0
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/chart_2d/plugin.cfg")
 
 [file_customization]
 

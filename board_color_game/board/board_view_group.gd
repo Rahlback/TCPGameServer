@@ -3,6 +3,7 @@ extends Node2D
 @onready var boards = $Boards
 @onready var board_panel = $BoardPanel
 @onready var board_stats = $BoardStats
+@onready var player_chart = $Panel/PlayerChart
 
 @export var max_points := 100
 
@@ -63,8 +64,15 @@ func _on_stat_update_timer_timeout():
 			if not player_id in player_stats:
 				player_stats[player_id] = []
 			player_stats[player_id].append(stat[player_id])
-		
-		
+			
+	var d_players : Dictionary
+	var d_colors = current_board.get_player_colors()
+	for player in d_colors:
+		d_players[player] = PackedVector2Array([])
 
-	board_stats.set_all_points(player_stats)
-	board_stats.draw_graph(current_board.get_player_colors())
+	for d_points in current_board.get_stats_last_n_items(100):
+		for player in d_points:
+			d_players[player].append(Vector2(0, d_points[player]))
+	
+	for player in d_players:
+		player_chart.add_plot(str(player), d_players[player], d_colors[player])
