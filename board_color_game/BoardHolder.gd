@@ -37,5 +37,5 @@ func _child_board_removed():
 	arrange_children()
 
 
-func _on_child_entered_tree(node):
+func _on_child_entered_tree(_child):
 	call_deferred("arrange_children")

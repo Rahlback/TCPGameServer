@@ -8,10 +8,10 @@ var user_name : String = "" ## User name. To be provided by the client
 var time_of_connection : int
 var last_message_time : int = 0
 
-static func _create_peer(tcp_stream: StreamPeerTCP, user_id: int, user_name: String, time_of_connection: int) -> Peer:
+static func _create_peer(tcp_stream_inp: StreamPeerTCP, user_id_inp: int, user_name_inp: String, time_of_connection_inp: int) -> Peer:
 	var new_peer = Peer.new()
-	new_peer.tcp_stream = tcp_stream
-	new_peer.user_id = user_id
-	new_peer.user_name = user_name
-	new_peer.time_of_connection = time_of_connection
+	new_peer.tcp_stream = tcp_stream_inp
+	new_peer.user_id = user_id_inp
+	new_peer.user_name = user_name_inp
+	new_peer.time_of_connection = time_of_connection_inp
 	return new_peer

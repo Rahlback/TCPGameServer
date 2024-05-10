@@ -3,7 +3,7 @@ extends Node2D
 @onready var boards = $Boards
 @onready var board_panel = $BoardPanel
 @onready var board_stats = $BoardStats
-@onready var player_chart = $Panel/PlayerChart
+@onready var player_chart = $MouseOn/Panel/PlayerChart
 
 @export var max_points := 100
 
@@ -28,7 +28,7 @@ func add_board(board: Node2D):
 	boards.add_child(board)
 	board.tree_exited.connect(_remove_board.bind(board))
 
-func _remove_board(board: Node2D):
+func _remove_board(_board: Node2D):
 	if boards.get_child_count() == 0:
 		queue_free()
 
@@ -56,6 +56,8 @@ func _on_switch_right_pressed():
 
 
 func _on_stat_update_timer_timeout():
+	if not $MouseOn.is_visible():
+		return
 	var current_board = boards.get_child(board_showing)
 	var player_stats = {} # {player_id: Array[int] (y_values}
 	var num_of_points = len(current_board.get_stats())
@@ -70,11 +72,13 @@ func _on_stat_update_timer_timeout():
 				player_stats[player_id] = []
 			player_stats[player_id].append(stat[player_id])
 			
-	var d_players : Dictionary
+	var d_players : Dictionary = {}
 	var d_colors = current_board.get_player_colors()
 	for player in d_colors:
 		d_players[player] = PackedVector2Array([])
-
+	
+	# TODO: Optimize this part. We might be able to send the Vector2 array
+	# directly to player_chart.add_plot
 	for d_points in current_board.get_stats_last_n_items(100):
 		for player in d_points:
 			d_players[player].append(Vector2(0, d_points[player]))

@@ -60,8 +60,8 @@ class Player:
 	
 	var score = 0
 
-	func _init(player_name: String):
-		self.player_name = player_name
+	func _init(player_name_inp: String):
+		self.player_name = player_name_inp
 		self.active = true
 
 # Called when the node enters the scene tree for the first time.
@@ -170,9 +170,10 @@ func _player_disconnected(player_id: int):
 		game_over(players[player_id].board_group)
 		
 	return
-	players[player_id].player_label.clear()
-	players[player_id].player_label.push_color(Color.RED)
-	players[player_id].player_label.add_text(players[player_id].player_name)
+	# TODO remove this code
+	#players[player_id].player_label.clear()
+	#players[player_id].player_label.push_color(Color.RED)
+	#players[player_id].player_label.add_text(players[player_id].player_name)
 
 # TODO Check if the player is playing any games, send the boards, positions and current status
 func _player_reconnected(player_id: int):
@@ -188,7 +189,7 @@ func _receive_message(id, message):
 	elif id in observers:
 		_receive_observer_message(id, message)
 
-func _receive_observer_message(observer_id, message):
+func _receive_observer_message(_observer_id, _message):
 	pass
 
 func _receive_player_message(player_id, message):
@@ -220,7 +221,7 @@ func send_message(id, message):
 
 
 func moves_received(board_group_id: int):
-	var players_in_group : Array[int]
+	var players_in_group : Array[int] = []
 	for player_id in board_group_moves[board_group_id]:
 		players_in_group.append(player_id)
 	
@@ -239,11 +240,11 @@ func moves_received(board_group_id: int):
 	#print(updated_player_positions)
 	
 	move_counter += (1.0 / len(board_groups))
-	var move_delta_string = "0"
-	var move_time_delta_average = 0
+	#var move_delta_string = "0"
+	#var move_time_delta_average = 0
 	if move_prev_time != 0:
 		move_time_delta = Time.get_ticks_msec() - move_prev_time
-		move_time_delta_average = move_time_delta
+		#move_time_delta_average = move_time_delta
 	move_prev_time = Time.get_ticks_msec()
 	move_counter_ui.set_text("Moves: " + str(round(move_counter)) + 
 							 " - " + str(round((move_prev_time - time_start) / move_counter)) 
@@ -263,14 +264,14 @@ func moves_received(board_group_id: int):
 var game_board_index = 0
 func start_game(players_list: Array[int]):
 	var game_boards := await _generate_boards(number_of_boards_per_group)
-	var player_setup: Dictionary
+	var player_setup: Dictionary = {}
 	
 	for i in range(players_list.size()):
 		player_setup[players_list[i]] = possible_colors[i]
 		side_bar.update_player_color(players_list[i], possible_colors[i])
 	print("Player setup: ", player_setup)
 	
-	var serialized_boards : Array[PackedByteArray]
+	var serialized_boards : Array[PackedByteArray] = []
 	var number_of_bytes := 4 # Number of boards, 4 bytes
 	for game_board in game_boards:
 		game_board.setup_players(player_setup)
@@ -278,7 +279,7 @@ func start_game(players_list: Array[int]):
 		var game_board_width_bytes : int = game_board.get_width()
 		var game_board_height_bytes : int = game_board.get_height() 
 		
-		var serialized_with_prelude : PackedByteArray
+		var serialized_with_prelude : PackedByteArray = []
 		#print("Game board width bytes ", ceil(game_board_width_bytes / 8.0))
 		serialized_with_prelude.append(game_board_width_bytes >> 8)
 		serialized_with_prelude.append(game_board_width_bytes & 0xff)
@@ -291,7 +292,7 @@ func start_game(players_list: Array[int]):
 		serialized_boards.append(serialized_with_prelude)
 	
 	print(number_of_bytes)
-	var final_message : PackedByteArray
+	var final_message : PackedByteArray = []
 	for x in range(4):
 		final_message.append((number_of_bytes >> (24 - x * 8)) & 0xff)
 	
@@ -308,13 +309,13 @@ func start_game(players_list: Array[int]):
 	GameServer.send_data_to_group(players_list, final_message)
 	
 	# Send player numbers to each member
-	var player_positions_data : PackedByteArray
+	var player_positions_data : PackedByteArray = []
 	for board in game_boards:
 		player_positions_data += board.get_serialized_player_number_positions()
 	print(player_positions_data)
 	
 	var player_position_num_of_bytes = player_positions_data.size()
-	var player_positions_message : PackedByteArray
+	var player_positions_message : PackedByteArray = []
 	for x in range(4):
 		player_positions_message.append((player_position_num_of_bytes >> (24 - x * 8)) & 0xff)
 	
@@ -333,7 +334,7 @@ func start_game(players_list: Array[int]):
 	#board_groups.append(game_boards)
 	
 	# Send moves
-	var group_moves : Dictionary
+	var group_moves : Dictionary = {}
 	for player in players_list:
 		players[player].board_group = next_board_group_id
 	board_group_moves[next_board_group_id] = group_moves
@@ -363,15 +364,15 @@ func game_over(board_group_id: int):
 	board_groups[board_group_id].clear()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	#print(board_groups[0][0].count_colors())
-	pass
-	
-func _physics_process(delta):
-	pass
+#func _process(delta):
+	##print(board_groups[0][0].count_colors())
+	#pass
+	#
+#func _physics_process(delta):
+	#pass
 	
 func _generate_boards(number_of_boards: int = 1) -> Array:
-	var local_boards: Array
+	var local_boards: Array = []
 	var new_board_group := BOARD_VIEW_GROUP.instantiate()
 	board_holder.add_child(new_board_group)
 	for x in range(number_of_boards):

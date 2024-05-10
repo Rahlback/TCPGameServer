@@ -122,7 +122,7 @@ func generate_random_board(width: int = 0, height: int = 0, main := true):
 		
 	if main:
 		for y in board_image.get_height():
-			var row : PackedByteArray
+			var row : PackedByteArray = []
 			for x in board_image.get_width():
 				if compare_colors(board_image.get_pixel(x, y), Color.BLACK):
 					row.append(WALL_TILE)
@@ -249,7 +249,7 @@ func validate_board(board_img: Image, start_pos: Vector2i, no_single_lanes = tru
 	return false
 	
 ## Returns an up-scaled image of the board image. 
-func get_scaled_image(scale: int = 5):
+func get_scaled_image(_scale: int = 5): # TODO remove _scale
 	if cached_scaled_image:
 		return _get_cached_scaled_image()
 	
@@ -298,7 +298,7 @@ func get_scaled_image(scale: int = 5):
 	#scaled_image.save_png("./test_images/" + str(randi()) + ".png")
 	return scaled_image
 
-func _get_cached_scaled_image(scale: int = 5):
+func _get_cached_scaled_image(_scale: int = 5): # TODO remove _scale
 	#var scaled_pixel = Image.create(scale, scale, false, Image.FORMAT_RGBA8)
 	
 	var tile_width = BASIC_FLOOR.get_width()
@@ -400,8 +400,8 @@ func is_oob(pos: Vector2i):
 ## Simulates the next step. Returns a list of new player positions. [br]
 ## player_moves = {player_id: "X"}
 func take_moves(player_moves: Dictionary, save_history := false):
-	var next_player_pos: Dictionary # {player_id: Vector2i}
-	var desired_next_pos: Dictionary # {Vector2i: player_id}
+	var next_player_pos: Dictionary = {} # {player_id: Vector2i}
+	var desired_next_pos: Dictionary = {} # {Vector2i: player_id}
 	var occupied_spaces = []
 	# Check for walls
 	for player_id in player_moves:
@@ -475,7 +475,7 @@ func history_playback_step():
 	return false
 
 func count_colors():
-	var colors: Dictionary
+	var colors: Dictionary = {}
 	var pixel_data = board.get_data()
 	var offset = 0
 	while offset < pixel_data.size():
@@ -503,17 +503,14 @@ func count_colors():
 func serialize_board():
 	# TODO Update to new board_data version
 	# width = 15
-	var bytes_per_row = ceil(board.get_width() / 8.0) # Get number 
 	var bits_per_row = board.get_width()
-	var num_of_rows = board.get_height()
 	
 	var pixel_data = board.get_data()
-	var simple_data: Array[int]
+	var simple_data: Array[int] = []
 	var current_num := 0
 	
 	var byte_offset = 0
-	var current_byte := 0
-	var number_of_bits := 0
+
 	var row_bits := 0
 	while byte_offset < pixel_data.size():
 		var color_slice = pixel_data.slice(byte_offset, byte_offset+4)
@@ -554,7 +551,7 @@ func serialize_board():
 ## 		[[br] width number of bytes: A single row ]
 ## 
 func get_full_board_serialized():
-	var serialized_board : PackedByteArray
+	var serialized_board : PackedByteArray = []
 	serialized_board.append(board_width)
 	serialized_board.append(board_height)
 	for row in board_data:

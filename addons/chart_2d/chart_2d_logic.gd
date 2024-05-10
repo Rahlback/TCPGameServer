@@ -165,7 +165,7 @@ func _convert_points_to_coords(plot_points: PackedVector2Array) -> PackedVector2
 			#if point.x < min_axis_value.x or point.y < min_axis_value.y:
 				#continue
 		var coord_point = Vector2(point.x * pixel_step.x + mid_point.x, -point.y * pixel_step.y + mid_point.y)
-		if ignore_values_outside_max:
+		if ignore_values_outside_max and not dynamic_axis_values:
 			if _check_coordinate_inside_chart_area(coord_point):
 				coord_points.append(coord_point)
 		else:

@@ -13,8 +13,8 @@ var is_mouse_hovering = false
 
 func _ready():
 	return
-	for x in range(0, 100):
-		add_player(str(x), x)
+	#for x in range(0, 100):
+		#add_player(str(x), x)
 
 func add_player(player_name: String, player_id: int):
 	if player_id in players:

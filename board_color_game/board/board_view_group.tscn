@@ -28,6 +28,20 @@ offset_right = 20.0
 offset_bottom = -290.0
 text = "The mouse is on the panel"
 
+[node name="Panel" type="Panel" parent="MouseOn"]
+offset_right = 200.0
+offset_bottom = 200.0
+
+[node name="PlayerChart" type="Control" parent="MouseOn/Panel"]
+anchors_preset = 0
+offset_right = 200.0
+offset_bottom = 200.0
+script = ExtResource("3_ncssj")
+ignore_x_values = true
+show_axis = false
+max_axis_value = Vector2i(0, 0)
+dynamic_axis_values = true
+
 [node name="NavigationButtons" type="HBoxContainer" parent="."]
 offset_left = -318.0
 offset_top = 280.0
@@ -53,22 +67,6 @@ offset_bottom = -404.0
 [node name="StatUpdateTimer" type="Timer" parent="."]
 wait_time = 0.05
 autostart = true
-
-[node name="Panel" type="Panel" parent="."]
-offset_left = 336.0
-offset_top = -229.0
-offset_right = 536.0
-offset_bottom = -29.0
-
-[node name="PlayerChart" type="Control" parent="Panel"]
-anchors_preset = 0
-offset_right = 200.0
-offset_bottom = 200.0
-script = ExtResource("3_ncssj")
-ignore_x_values = true
-show_axis = false
-max_axis_value = Vector2i(0, 0)
-dynamic_axis_values = true
 
 [connection signal="mouse_entered" from="BoardPanel" to="." method="_on_panel_mouse_entered"]
 [connection signal="mouse_exited" from="BoardPanel" to="." method="_on_panel_mouse_exited"]

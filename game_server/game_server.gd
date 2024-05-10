@@ -34,6 +34,8 @@ var pending_peers: Array[StreamPeerTCP] = []
 ## A dictionary containing the IDs of disconnected peers { peer_id: [Peer] }
 var disconnected_peers: Dictionary 
 
+var bytes_read := 0
+
 signal peer_connected(id, user_name) ## Emitted when a client connects
 signal peer_disconnected(id) ## Emitted when a client disconnects
 signal peer_reconnected(id) ## Emitted when a client reconnects
@@ -42,12 +44,18 @@ signal peer_message_received(id, message)
 @onready var server_status = $CanvasLayer/ServerStatus
 
 func _ready():
+	Performance.add_custom_monitor("Data received KB", get_number_of_bytes_read)
 	pass
+
+
+func get_number_of_bytes_read():
+	var temp_bytes_read = bytes_read
+	bytes_read = 0
+	return temp_bytes_read / 1000
 
 ## Start the TCP server
 func start():
 	var result = server.listen(PORT)
-	var server_started : String
 	if result == 0:
 		server_status.push_color(Color.GREEN)
 		server_status.add_text("Server is online")
@@ -90,7 +98,7 @@ func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := f
 	#print("Send data to group")
 	if add_prelude:
 		var length_of_data = len(data)
-		var prelude : PackedByteArray
+		var prelude : PackedByteArray = []
 		for x in range(4):
 			prelude.append((length_of_data >> (24 - x * 8)) & 0xff)
 		
@@ -109,6 +117,7 @@ func send_data_to_group(ids: Array[int], data: PackedByteArray, add_prelude := f
 func receive_message(peer: Peer):
 	peer.last_message_time = Time.get_ticks_msec()
 	var available_data = peer.tcp_stream.get_available_bytes()
+	bytes_read += available_data
 	#print("Available data: ", available_data)
 	var message = peer.tcp_stream.get_string(available_data)
 	#print("	Receive message: ", peer.user_id, " message= ", message)
