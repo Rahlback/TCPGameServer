@@ -7,7 +7,7 @@
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_vbcky")
-number_of_boards_per_group = 10
+number_of_boards_per_group = 200
 max_board_width = 20
 max_board_height = 20
 image_scale = 15
