@@ -3,7 +3,8 @@ extends Node2D
 @onready var boards = $Boards
 @onready var board_panel = $BoardPanel
 @onready var board_stats = $BoardStats
-@onready var player_chart = $MouseOn/Panel/PlayerChart
+@onready var player_chart = $CanvasLayer/MouseOn/Panel/PlayerChart
+@onready var mouse_on = $CanvasLayer/MouseOn
 
 @export var max_points := 100
 
@@ -37,10 +38,10 @@ func get_size() -> Vector2:
 
 
 func _on_panel_mouse_entered():
-	$MouseOn.show()
+	mouse_on.show()
 
 func _on_panel_mouse_exited():
-	$MouseOn.hide()
+	mouse_on.hide()
 
 func _on_switch_left_pressed():
 	if board_showing > 0:
@@ -56,7 +57,7 @@ func _on_switch_right_pressed():
 
 
 func _on_stat_update_timer_timeout():
-	if not $MouseOn.is_visible():
+	if not mouse_on.is_visible():
 		return
 	var current_board = boards.get_child(board_showing)
 	var player_stats = {} # {player_id: Array[int] (y_values}
