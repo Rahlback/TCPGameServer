@@ -120,14 +120,6 @@ func _input(event):
 	if event is InputEventMouseMotion:
 		if Input.is_action_pressed("CameraPan"):
 			$Camera.position -= (event.relative / zoom)
-		
-	#if len(board_groups) > 0:
-		#if event.is_action_pressed("D"):
-			#game_board_index = (game_board_index + 1) % len(board_groups[board_group_index])
-		#if event.is_action_pressed("S"):
-			#board_group_index = (board_group_index + 1) % len(board_groups)
-		#_show_board(board_group_index, game_board_index)
-
 
 func _player_connected(player_id: int, player_name: String):
 	if player_name == "observer":
@@ -262,7 +254,6 @@ func moves_received(board_group_id: int):
 	
 
 ## Starts a game using the ids in [param players_list]. [br]
-var game_board_index = 0
 func start_game(players_list: Array[int]):
 	var game_boards := await _generate_boards(number_of_boards_per_group)
 	var player_setup: Dictionary = {}
@@ -350,7 +341,6 @@ func start_game(players_list: Array[int]):
 	if show_boards:
 		for board in game_boards:
 			$BoardViewer.add_board(board.get_scaled_image(image_scale), len(board_groups)-1)
-	#_show_board(game_boards[game_board_index])
 	time_start = Time.get_ticks_msec()
 
 func game_over(board_group_id: int):
