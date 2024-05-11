@@ -46,6 +46,7 @@ var zoom := Vector2(1, 1)
 @onready var side_bar = $UI/SideBar
 @onready var move_counter_ui = $UI/MoveCounter
 @onready var board_holder = $BoardHolder
+@onready var board_queue_timer = $BoardQueueTimer
 
 
 # debug
@@ -77,8 +78,14 @@ func _ready():
 	# Fix bug when camera zoom is set in editor
 	# TODO: The zoom level should be moved to the camera.
 	zoom = $Camera.get_zoom()
-	
+	Performance.add_custom_monitor("Connected players", _get_num_of_connected_players)
 
+func _get_num_of_connected_players():
+	var num_of_active_players := 0
+	for player in players:
+		if players[player].active:
+			num_of_active_players += 1
+	return num_of_active_players
 
 var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
 
@@ -114,14 +121,13 @@ func _input(event):
 		if Input.is_action_pressed("CameraPan"):
 			$Camera.position -= (event.relative / zoom)
 		
-	if len(board_groups) > 0:
-		if event.is_action_pressed("D"):
-			game_board_index = (game_board_index + 1) % len(board_groups[board_group_index])
-		if event.is_action_pressed("S"):
-			board_group_index = (board_group_index + 1) % len(board_groups)
+	#if len(board_groups) > 0:
+		#if event.is_action_pressed("D"):
+			#game_board_index = (game_board_index + 1) % len(board_groups[board_group_index])
+		#if event.is_action_pressed("S"):
+			#board_group_index = (board_group_index + 1) % len(board_groups)
 		#_show_board(board_group_index, game_board_index)
 
-var board_group_index = 0
 
 func _player_connected(player_id: int, player_name: String):
 	if player_name == "observer":
@@ -130,14 +136,7 @@ func _player_connected(player_id: int, player_name: String):
 		return
 	print_debug("Player connected: %s %s" % [player_id, player_name])
 	players[player_id] = Player.new(player_name)
-	#var new_label : RichTextLabel = $PlayerListGrid/PlayerRichLabelTemplate.duplicate(0)
-	#new_label.set_text(players[player_id].player_name)
-	#new_label.show()
-	#$PlayerListGrid.add_child(new_label)
-	#players[player_id].player_label = new_label
-	#
 	side_bar.add_player(players[player_id].player_name, player_id)
-	
 	
 	send_message(player_id, "Welcome to the Game!")
 	add_player_to_queue(player_id)
@@ -145,17 +144,24 @@ func _player_connected(player_id: int, player_name: String):
 func add_player_to_queue(player_id: int):
 	board_group_queue.append(player_id)
 	print(board_group_queue)
-	
-	if board_group_queue.size() == number_of_players_on_board:
-		var board_players_still_active = true
-		for id in board_group_queue:
-			if not players[id].active:
-				board_players_still_active = false
-				board_group_queue.erase(id)
-		
-		if board_players_still_active:
-			start_game(board_group_queue.duplicate()) # concurrency might be an issue?
-			board_group_queue.clear()
+
+func _start_game_with_check():
+	# TODO Fix hard coded 4. It should be replaced with the number of players
+	# on a board. 
+	while len(board_group_queue) >= 4:
+		var new_group = board_group_queue.slice(0, 4)
+		if new_group.size() == 4:
+			var board_players_still_active = true
+			for id in new_group:
+				if not players[id].active:
+					board_players_still_active = false
+					board_group_queue.erase(id)
+			
+			if board_players_still_active:
+				start_game(new_group.duplicate()) # concurrency might be an issue?
+				# TODO Is there a better way to do this?
+				for id in new_group:
+					board_group_queue.erase(id)
 
 func _player_disconnected(player_id: int):
 	#players[player_id].player_label.hide()
@@ -168,12 +174,7 @@ func _player_disconnected(player_id: int):
 
 	if players[player_id].board_group >= 0: # In case this player wasn't part of a group
 		game_over(players[player_id].board_group)
-		
-	return
-	# TODO remove this code
-	#players[player_id].player_label.clear()
-	#players[player_id].player_label.push_color(Color.RED)
-	#players[player_id].player_label.add_text(players[player_id].player_name)
+
 
 # TODO Check if the player is playing any games, send the boards, positions and current status
 func _player_reconnected(player_id: int):
@@ -304,7 +305,11 @@ func start_game(players_list: Array[int]):
 	print(final_message)
 	var error = GameServer.send_string_to_group(players_list, "GAME_STARTING")
 	if error != OK:
-		print("Failed to send GAME_STARTING")
+		print("Failed to send GAME_STARTING. Abort this game setup: ", players_list)
+		for board in game_boards:
+			board.queue_free()
+		return
+		
 	
 	GameServer.send_data_to_group(players_list, final_message)
 	
@@ -351,8 +356,9 @@ func start_game(players_list: Array[int]):
 func game_over(board_group_id: int):
 	# TODO: Gather statistics and add to the players
 	# TODO: 
-	if not board_groups[board_group_id]:
+	if len(board_groups[board_group_id]) == 0 or not board_groups[board_group_id][0]:
 		return
+		
 	for player_id in board_groups[board_group_id][0].player_colors:
 		if players[player_id].active:
 			GameServer.send_string(player_id, "GAME_OVER")
@@ -371,8 +377,8 @@ func game_over(board_group_id: int):
 #func _physics_process(delta):
 	#pass
 	
-func _generate_boards(number_of_boards: int = 1) -> Array:
-	var local_boards: Array = []
+func _generate_boards(number_of_boards: int = 1) -> Array[Node2D]:
+	var local_boards: Array[Node2D] = []
 	var new_board_group := BOARD_VIEW_GROUP.instantiate()
 	board_holder.add_child(new_board_group)
 	for x in range(number_of_boards):

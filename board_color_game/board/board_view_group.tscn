@@ -29,6 +29,7 @@ offset_bottom = -290.0
 text = "The mouse is on the panel"
 
 [node name="Panel" type="Panel" parent="MouseOn"]
+layout_mode = 0
 offset_right = 200.0
 offset_bottom = 200.0
 
