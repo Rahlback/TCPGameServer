@@ -1,18 +1,16 @@
-[gd_scene load_steps=5 format=3 uid="uid://kgcdpyukdks5"]
+[gd_scene load_steps=4 format=3 uid="uid://kgcdpyukdks5"]
 
 [ext_resource type="Script" path="res://board_color_game/board_color_main.gd" id="1_vbcky"]
 [ext_resource type="Script" path="res://board_color_game/BoardViewer.gd" id="2_uvhcv"]
 [ext_resource type="PackedScene" uid="uid://bx8yi2v07g73q" path="res://board_color_game/ui/sidebar/SideBar.tscn" id="3_s0ufn"]
-[ext_resource type="Script" path="res://board_color_game/BoardHolder.gd" id="4_txyyy"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_vbcky")
-number_of_boards_per_group = 1
 max_board_width = 20
 max_board_height = 20
 image_scale = 15
 moves_until_game_over = 50000
-possible_colors = Array[Color]([Color(1, 0, 0, 1), Color(0, 1, 0, 1), Color(0, 0, 1, 1), Color(1, 0.67451, 1, 1), Color(0.309804, 0.584314, 0.435294, 1), Color(0.72549, 0.270588, 0.952941, 1), Color(0.133333, 0.572549, 0.690196, 1), Color(0.658824, 0.584314, 0.129412, 1), Color(0.854902, 0.458824, 0.215686, 1), Color(0.454902, 0.52549, 0.247059, 1), Color(0.52549, 0.517647, 0.396078, 1)])
+possible_colors = Array[Color]([Color(1, 0, 0, 1), Color(0, 1, 0, 1), Color(0, 0, 1, 1), Color(0.72549, 0.270588, 0.952941, 1), Color(0.917647, 0, 0.427451, 1), Color(0.133333, 0.572549, 0.690196, 1), Color(0.658824, 0.584314, 0.129412, 1), Color(0.854902, 0.458824, 0.215686, 1), Color(0.454902, 0.52549, 0.247059, 1), Color(0.52549, 0.517647, 0.396078, 1), Color(0.309804, 0.584314, 0.435294, 1)])
 
 [node name="PlayerList" type="VBoxContainer" parent="."]
 offset_right = 40.0
@@ -60,16 +58,13 @@ offset_bottom = 111.0
 text = "Lost moves: "
 
 [node name="Camera" type="Camera2D" parent="."]
-position = Vector2(101, 122)
-zoom = Vector2(0.8, 0.8)
+position = Vector2(577, 325)
 
 [node name="DebugLayer" type="CanvasLayer" parent="."]
 
 [node name="CurrentBuffer" type="Label" parent="DebugLayer"]
-offset_left = 355.0
-offset_top = 9.0
-offset_right = 526.0
-offset_bottom = 77.0
+offset_right = 40.0
+offset_bottom = 23.0
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -86,15 +81,5 @@ offset_right = 77.0
 offset_bottom = 102.0
 text = "Moves: "
 
-[node name="BoardHolder" type="Node2D" parent="."]
-script = ExtResource("4_txyyy")
-boards_per_row = 10
-
-[node name="BoardQueueTimer" type="Timer" parent="."]
-wait_time = 0.5
-autostart = true
-
 [connection signal="timeout" from="GameTick" to="." method="_on_game_tick_timeout"]
 [connection signal="timeout" from="HistoryTick" to="." method="_on_history_tick_timeout"]
-[connection signal="child_entered_tree" from="BoardHolder" to="BoardHolder" method="_on_child_entered_tree"]
-[connection signal="timeout" from="BoardQueueTimer" to="." method="_start_game_with_check"]

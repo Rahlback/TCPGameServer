@@ -24,6 +24,10 @@ Logger="*res://logger/Logger.tscn"
 
 window/vsync/vsync_mode=0
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/chart_2d/plugin.cfg")
+
 [file_customization]
 
 folder_colors={

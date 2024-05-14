@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://5db5sm6ylk5f"
+path="res://.godot/imported/basic_floor.png-ff068142de0c30702a3bce1571484b23.image"
+
+[deps]
+
+source_file="res://board_color_game/ui/dungeon_tiles/basic_floor.png"
+dest_files=["res://.godot/imported/basic_floor.png-ff068142de0c30702a3bce1571484b23.image"]
+
+[params]
+

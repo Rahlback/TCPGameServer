@@ -5,6 +5,7 @@
 [node name="GameServer" type="Node"]
 script = ExtResource("1_3e0cg")
 PORT = 9079
+heartbeat_timer_ms = 10000
 
 [node name="HeartBeatTimer" type="Timer" parent="."]
 autostart = true
@@ -14,5 +15,7 @@ autostart = true
 [node name="ServerStatus" type="RichTextLabel" parent="CanvasLayer"]
 offset_right = 308.0
 offset_bottom = 70.0
+focus_mode = 2
+selection_enabled = true
 
 [connection signal="timeout" from="HeartBeatTimer" to="." method="_on_heart_beat_timer_timeout"]
