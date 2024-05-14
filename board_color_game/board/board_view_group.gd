@@ -3,11 +3,12 @@ extends Node2D
 @onready var boards = $Boards
 @onready var board_panel = $BoardPanel
 @onready var board_stats = $BoardStats
-@onready var player_chart = $CanvasLayer/MouseOn/Panel/PlayerChart
+@onready var player_chart = $CanvasLayer/MouseOn/Panel/VBoxContainer/PlayerChart
 @onready var mouse_on = $CanvasLayer/MouseOn
+@onready var player_names = $CanvasLayer/MouseOn/Panel/VBoxContainer/PlayerNames
 
 @export var max_points := 100
-
+@export var graph_points := 200 ## Sets how many X points there should be on the graph
 # This is needed because we are adding boards before this node has entered
 # the scene tree
 var board_counter := 0 
@@ -17,6 +18,14 @@ func _ready():
 	await get_tree().process_frame 
 	if boards.get_child_count() > 0:
 		show_board(board_showing)
+		
+		var players = boards.get_child(0).get_player_colors()
+		var player_names_dict = boards.get_child(0).get_player_names()
+		for player in players:
+			player_names.push_color(players[player])
+			player_names.append_text(player_names_dict[player] + "\n")
+	
+	
 
 func show_board(i):
 	if i >= 0 and i < boards.get_child_count():
@@ -80,7 +89,7 @@ func _on_stat_update_timer_timeout():
 	
 	# TODO: Optimize this part. We might be able to send the Vector2 array
 	# directly to player_chart.add_plot
-	for d_points in current_board.get_stats_last_n_items(100):
+	for d_points in current_board.get_stats_last_n_items(graph_points):
 		for player in d_points:
 			d_players[player].append(Vector2(0, d_points[player]))
 	

@@ -257,16 +257,19 @@ func moves_received(board_group_id: int):
 func start_game(players_list: Array[int]):
 	var game_boards := await _generate_boards(number_of_boards_per_group)
 	var player_setup: Dictionary = {}
-	
-	for i in range(players_list.size()):
+	var player_names_dictionary : Dictionary = {}
+	for i in range(players_list.size()): # TODO iterate over elements directly instead.
 		player_setup[players_list[i]] = possible_colors[i]
 		side_bar.update_player_color(players_list[i], possible_colors[i])
+		player_names_dictionary[players_list[i]] = players[players_list[i]].player_name
+
 	print("Player setup: ", player_setup)
 	
 	var serialized_boards : Array[PackedByteArray] = []
 	var number_of_bytes := 4 # Number of boards, 4 bytes
 	for game_board in game_boards:
 		game_board.setup_players(player_setup)
+		game_board.set_player_names(player_names_dictionary)
 		var serialized_board = game_board.get_obstacle_serialized()
 		var game_board_width_bytes : int = game_board.get_width()
 		var game_board_height_bytes : int = game_board.get_height() 

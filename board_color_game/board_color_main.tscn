@@ -11,7 +11,7 @@ number_of_boards_per_group = 1
 max_board_width = 20
 max_board_height = 20
 image_scale = 15
-moves_until_game_over = 1500
+moves_until_game_over = 50000
 possible_colors = Array[Color]([Color(1, 0, 0, 1), Color(0, 1, 0, 1), Color(0, 0, 1, 1), Color(1, 0.67451, 1, 1), Color(0.309804, 0.584314, 0.435294, 1), Color(0.72549, 0.270588, 0.952941, 1), Color(0.133333, 0.572549, 0.690196, 1), Color(0.658824, 0.584314, 0.129412, 1), Color(0.854902, 0.458824, 0.215686, 1), Color(0.454902, 0.52549, 0.247059, 1), Color(0.52549, 0.517647, 0.396078, 1)])
 
 [node name="PlayerList" type="VBoxContainer" parent="."]

@@ -48,28 +48,38 @@ autostart = true
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="MouseOn" type="Label" parent="CanvasLayer"]
+[node name="MouseOn" type="Control" parent="CanvasLayer"]
 visible = false
+layout_mode = 3
+anchors_preset = 0
 offset_left = 945.0
 offset_top = 439.0
-offset_right = 1285.0
-offset_bottom = 468.0
-text = "The mouse is on the panel"
+offset_right = 1145.0
+offset_bottom = 641.0
 
 [node name="Panel" type="Panel" parent="CanvasLayer/MouseOn"]
 layout_mode = 0
 offset_right = 200.0
 offset_bottom = 200.0
 
-[node name="PlayerChart" type="Control" parent="CanvasLayer/MouseOn/Panel"]
-anchors_preset = 0
-offset_right = 200.0
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MouseOn/Panel"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 0
+offset_right = 199.0
 offset_bottom = 200.0
+
+[node name="PlayerChart" type="Control" parent="CanvasLayer/MouseOn/Panel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 80.78)
+layout_mode = 2
 script = ExtResource("3_ncssj")
 ignore_x_values = true
 show_axis = false
 max_axis_value = Vector2i(0, 0)
 dynamic_axis_values = true
+
+[node name="PlayerNames" type="RichTextLabel" parent="CanvasLayer/MouseOn/Panel/VBoxContainer"]
+layout_mode = 2
+fit_content = true
 
 [connection signal="mouse_entered" from="BoardPanel" to="." method="_on_panel_mouse_entered"]
 [connection signal="mouse_exited" from="BoardPanel" to="." method="_on_panel_mouse_exited"]

@@ -32,6 +32,7 @@ var rev_player_numbers : Dictionary ## {player_number: player_id}
 var player_floors : Dictionary
 var player_scores : Dictionary
 var stats : Array[Dictionary] ## Move index: {player_id: score, ...}
+var player_names : Dictionary ## {player_id: "PlayerName"}
 
 var board : Image
 var starting_board : Image
@@ -583,6 +584,14 @@ func get_stats_last_n_items(n: int):
 	
 func get_player_colors():
 	return player_colors
+
+func get_player_names():
+	return player_names
+
+## Expects a dictionary = {player_id: "PlayerName}
+func set_player_names(names: Dictionary):
+	player_names = names
+
 # TODO
 # Function to get updated state of the board 
 # Save history of the players? In order to be able to repeat it.
