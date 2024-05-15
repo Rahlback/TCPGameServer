@@ -47,15 +47,18 @@ var zoom := Vector2(1, 1)
 @onready var move_counter_ui = $UI/MoveCounter
 @onready var board_holder = $BoardHolder
 @onready var board_queue_timer = $BoardQueueTimer
+@onready var score_tracker = $UI/ScoreTracker
 
 
+# TODO add a color variable to keep the color persistent.
+# Need to update the player colors used in start_game()
 class Player:
 	var player_name : String
 	var active : bool
 	var disconnect_time : int = 0
 	var observers : Array[int] # A list of all observers
 	var board_group : int = -1
-
+	
 	var score = 0
 	var mmr = 1000
 
@@ -128,6 +131,7 @@ func _player_connected(player_id: int, player_name: String):
 	
 	send_message(player_id, "Welcome to the Game!")
 	add_player_to_queue(player_id)
+	score_tracker.add_player(player_id, players[player_id])
 	
 func add_player_to_queue(player_id: int):
 	board_group_queue.append(player_id)
@@ -367,7 +371,6 @@ func game_over(board_group_id: int):
 	var new_mmr = Score.calculate_score(player_scores, walkable_tiles)
 	for player_id in new_mmr:
 		players[player_id].mmr = new_mmr[player_id]
-		
 	board_groups[board_group_id].clear()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -6,6 +6,8 @@ extends Control
 
 enum plot_type_enum {LINE, PIE, BAR}
 
+## This variable makes the docstrings work
+@export var HELLO_WORLD : bool
 @export_group("Chart")
 @export var plot_type : plot_type_enum
 @export var line_width_px := 3.0
@@ -16,12 +18,13 @@ enum plot_type_enum {LINE, PIE, BAR}
 
 @export_group("Axis")
 @export var show_axis := true ## Show axis lines
-## Skip drawing points outside of the chart area
+## Skip drawing points outside of the chart area. This is assumed to be false
+## if dynamic_axis_values is true
 @export var ignore_values_outside_max := true
-@export var max_axis_value := Vector2i(100, 100)
-@export var min_axis_value := Vector2i(0, 0)
 ## Sets the max and min axis values depending on the data provided via [method add_plot]
 @export var dynamic_axis_values := false
+@export var max_axis_value := Vector2i(100, 100)
+@export var min_axis_value := Vector2i(0, 0)
 @export var axis_color : Color = Color.WHITE
 @export var axis_line_width := 3
 

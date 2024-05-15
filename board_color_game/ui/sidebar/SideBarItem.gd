@@ -11,6 +11,8 @@ func set_player_name(player_name_string: String):
 	player_name_memory = player_name_string
 
 func set_color(new_color: Color):
+	if not is_node_ready():
+		await ready
 	player_name.clear()
 	player_name.push_color(new_color)
 	player_name.append_text(player_name_memory)

@@ -51,11 +51,15 @@ autostart = true
 [node name="MouseOn" type="Control" parent="CanvasLayer"]
 visible = false
 layout_mode = 3
-anchors_preset = 0
-offset_left = 945.0
-offset_top = 439.0
-offset_right = 1145.0
-offset_bottom = 641.0
+anchor_left = 0.99
+anchor_top = 0.99
+anchor_right = 0.99
+anchor_bottom = 0.99
+offset_left = -198.848
+offset_top = -202.0
+offset_bottom = -14.904
+grow_horizontal = 0
+grow_vertical = 0
 mouse_filter = 2
 
 [node name="Panel" type="Panel" parent="CanvasLayer/MouseOn"]
@@ -66,9 +70,16 @@ mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/MouseOn/Panel"]
 custom_minimum_size = Vector2(200, 200)
-layout_mode = 0
-offset_right = 199.0
-offset_bottom = 200.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.94
+anchor_top = 0.94
+anchor_right = 0.94
+anchor_bottom = 0.94
+offset_left = -188.0
+offset_top = -188.0
+offset_right = 11.0
+offset_bottom = 12.0
 mouse_filter = 2
 
 [node name="PlayerChart" type="Control" parent="CanvasLayer/MouseOn/Panel/VBoxContainer"]
@@ -76,10 +87,11 @@ custom_minimum_size = Vector2(0, 80.78)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("3_ncssj")
+HELLO_WORLD = null
 ignore_x_values = true
 show_axis = false
-max_axis_value = Vector2i(0, 0)
 dynamic_axis_values = true
+max_axis_value = Vector2i(0, 0)
 
 [node name="PlayerNames" type="RichTextLabel" parent="CanvasLayer/MouseOn/Panel/VBoxContainer"]
 layout_mode = 2
