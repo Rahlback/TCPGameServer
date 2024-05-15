@@ -19,22 +19,6 @@ offset_right = 40.0
 offset_bottom = 40.0
 theme_override_constants/separation = -5
 
-[node name="PlayerListGrid" type="GridContainer" parent="."]
-visible = false
-offset_right = 40.0
-offset_bottom = 40.0
-columns = 10
-
-[node name="PlayerRichLabelTemplate" type="RichTextLabel" parent="PlayerListGrid"]
-visible = false
-layout_mode = 2
-fit_content = true
-autowrap_mode = 0
-
-[node name="PlayerLabel" type="Label" parent="PlayerListGrid"]
-visible = false
-layout_mode = 2
-
 [node name="GameTick" type="Timer" parent="."]
 wait_time = 0.819
 one_shot = true
@@ -42,34 +26,15 @@ one_shot = true
 [node name="HistoryTick" type="Timer" parent="."]
 wait_time = 0.05
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(594, 302)
-
 [node name="BoardViewer" type="Node2D" parent="."]
 position = Vector2(201, 300)
 script = ExtResource("2_uvhcv")
 x_step = 300
 y_step = 300
 
-[node name="LostMoves" type="Label" parent="."]
-visible = false
-offset_left = 857.0
-offset_top = 88.0
-offset_right = 953.0
-offset_bottom = 111.0
-text = "Lost moves: "
-
 [node name="Camera" type="Camera2D" parent="."]
 position = Vector2(101, 122)
 zoom = Vector2(0.8, 0.8)
-
-[node name="DebugLayer" type="CanvasLayer" parent="."]
-
-[node name="CurrentBuffer" type="Label" parent="DebugLayer"]
-offset_left = 355.0
-offset_top = 9.0
-offset_right = 526.0
-offset_bottom = 77.0
 
 [node name="UI" type="CanvasLayer" parent="."]
 

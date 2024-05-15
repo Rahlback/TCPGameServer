@@ -1,5 +1,6 @@
 extends Node2D
 
+@export var normal_category_item := 0
 @export_category("Board setup")
 @export var number_of_simultaneous_games := 10
 @export var number_of_boards_per_group := 100
@@ -32,7 +33,6 @@ var board_groups : Dictionary
 var board_group_queue: Array[int]
 var board_group_moves : Dictionary
 var board_group_id_latest = -1
-#var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
 var move_counter := 0.0
@@ -48,9 +48,6 @@ var zoom := Vector2(1, 1)
 @onready var board_holder = $BoardHolder
 @onready var board_queue_timer = $BoardQueueTimer
 
-
-# debug
-var lost_moves = 0 
 
 class Player:
 	var player_name : String
@@ -86,8 +83,6 @@ func _get_num_of_connected_players():
 		if players[player].active:
 			num_of_active_players += 1
 	return num_of_active_players
-
-var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
 
 # This is for testing
 #var current_board = 0
@@ -202,9 +197,7 @@ func _receive_player_message(player_id, message):
 		if len(board_group_moves[players[player_id].board_group]) == 4:
 			moves_received(players[player_id].board_group)
 	else:
-		lost_moves += 1
 		print_rich("Lost move from [color=black]" + str(player_id) + ". Message = [color=red]" + message)
-		$LostMoves.set_text("Lost moves: " + str(lost_moves))
 		GameServer.send_string(player_id, "RESEND_MOVE")
 	
 	
