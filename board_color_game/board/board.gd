@@ -43,6 +43,7 @@ var board_height : int
 var board_data : Array[PackedByteArray]
 const WALL_TILE := 255
 const WHITE_TILE := 254
+var num_of_white_tiles := 0
 
 var cached_image_scale : int = -1
 var cached_scaled_image : Image
@@ -129,6 +130,7 @@ func generate_random_board(width: int = 0, height: int = 0, main := true):
 					row.append(WALL_TILE)
 				else:
 					row.append(WHITE_TILE)
+					num_of_white_tiles += 1
 			board_data.append(row)
 		starting_positions.append(player_pos)
 		starting_positions.append(Vector2i(player_pos.x, height - 1 - player_pos.y))
@@ -137,7 +139,9 @@ func generate_random_board(width: int = 0, height: int = 0, main := true):
 		
 		board_width = len(board_data[0])
 		board_height = len(board_data)
-
+		
+		
+		
 	return board
 
 
@@ -155,11 +159,6 @@ func setup_players(players: Dictionary):
 		var start_pos : Vector2i = starting_positions[current_start_pos]
 		board_data[start_pos.y][start_pos.x] = current_start_pos + 1
 		player_positions[player_id] = starting_positions[current_start_pos]
-		
-		# TODO: Remove from here when board_data works
-		rev_player_colors[players[player_id]] = player_id
-		board.set_pixelv(player_positions[player_id], player_colors[player_id])
-		# To here
 		
 		current_start_pos += 1
 		player_numbers[player_id] = current_start_pos
@@ -587,6 +586,9 @@ func get_player_colors():
 
 func get_player_names():
 	return player_names
+
+func get_num_of_walkable_tiles():
+	return num_of_white_tiles
 
 ## Expects a dictionary = {player_id: "PlayerName}
 func set_player_names(names: Dictionary):

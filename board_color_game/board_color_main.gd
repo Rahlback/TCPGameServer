@@ -55,8 +55,9 @@ class Player:
 	var disconnect_time : int = 0
 	var observers : Array[int] # A list of all observers
 	var board_group : int = -1
-	
+
 	var score = 0
+	var mmr = 1000
 
 	func _init(player_name_inp: String):
 		self.player_name = player_name_inp
@@ -342,17 +343,31 @@ func start_game(players_list: Array[int]):
 func game_over(board_group_id: int):
 	# TODO: Gather statistics and add to the players
 	# TODO: 
+	#Score.calculate_score()
 	if len(board_groups[board_group_id]) == 0 or not board_groups[board_group_id][0]:
 		return
-		
+	
+	var player_scores: Dictionary = {}
 	for player_id in board_groups[board_group_id][0].player_colors:
+		player_scores[player_id] = [0.0, players[player_id].mmr]
 		if players[player_id].active:
 			GameServer.send_string(player_id, "GAME_OVER")
 			
 			add_player_to_queue(player_id)
 	
+	var walkable_tiles := 0
 	for board: Node in board_groups[board_group_id]:
+		var local_stats : Dictionary = board.get_stats().back()
+		walkable_tiles += board.get_num_of_walkable_tiles()
+		for player_id in local_stats: # Dictionary {player_id: score}
+			player_scores[player_id][0] += local_stats[player_id]
+			
 		board.queue_free()
+	print("Player_scores= ", player_scores, " walkable tiles= ", walkable_tiles)
+	var new_mmr = Score.calculate_score(player_scores, walkable_tiles)
+	for player_id in new_mmr:
+		players[player_id].mmr = new_mmr[player_id]
+		
 	board_groups[board_group_id].clear()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
