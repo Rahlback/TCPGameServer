@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3 uid="uid://dnwy80el3tqyx"]
+
+[ext_resource type="Script" path="res://board_color_game/ui/score_tracker/ScoreTracker.gd" id="1_sa1vw"]
+[ext_resource type="Script" path="res://addons/chart_2d/chart_2d_logic.gd" id="2_t4o26"]
+
+[node name="ScoreTracker" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_sa1vw")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.1
+autostart = true
+
+[node name="StatViewer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PlayerNames" type="VBoxContainer" parent="StatViewer"]
+custom_minimum_size = Vector2(48.15, 0)
+layout_mode = 2
+
+[node name="Chart2D" type="Control" parent="StatViewer"]
+custom_minimum_size = Vector2(220, 200)
+layout_mode = 2
+script = ExtResource("2_t4o26")
+ignore_x_values = true
+show_axis = false
+dynamic_axis_values = true
+max_axis_value = Vector2i(100, 1000)
+axis_line_width = 1
+
+[connection signal="timeout" from="Timer" to="." method="_update_player_mmr"]

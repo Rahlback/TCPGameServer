@@ -1,39 +1,23 @@
-[gd_scene load_steps=5 format=3 uid="uid://kgcdpyukdks5"]
+[gd_scene load_steps=6 format=3 uid="uid://kgcdpyukdks5"]
 
 [ext_resource type="Script" path="res://board_color_game/board_color_main.gd" id="1_vbcky"]
 [ext_resource type="Script" path="res://board_color_game/BoardViewer.gd" id="2_uvhcv"]
 [ext_resource type="PackedScene" uid="uid://bx8yi2v07g73q" path="res://board_color_game/ui/sidebar/SideBar.tscn" id="3_s0ufn"]
 [ext_resource type="Script" path="res://board_color_game/BoardHolder.gd" id="4_txyyy"]
+[ext_resource type="PackedScene" uid="uid://dnwy80el3tqyx" path="res://board_color_game/ui/score_tracker/ScoreTracker.tscn" id="5_cn36e"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_vbcky")
-number_of_boards_per_group = 1
+number_of_boards_per_group = 20
 max_board_width = 20
 max_board_height = 20
 image_scale = 15
-moves_until_game_over = 50000
 possible_colors = Array[Color]([Color(1, 0, 0, 1), Color(0, 1, 0, 1), Color(0, 0, 1, 1), Color(1, 0.67451, 1, 1), Color(0.309804, 0.584314, 0.435294, 1), Color(0.72549, 0.270588, 0.952941, 1), Color(0.133333, 0.572549, 0.690196, 1), Color(0.658824, 0.584314, 0.129412, 1), Color(0.854902, 0.458824, 0.215686, 1), Color(0.454902, 0.52549, 0.247059, 1), Color(0.52549, 0.517647, 0.396078, 1)])
 
 [node name="PlayerList" type="VBoxContainer" parent="."]
 offset_right = 40.0
 offset_bottom = 40.0
 theme_override_constants/separation = -5
-
-[node name="PlayerListGrid" type="GridContainer" parent="."]
-visible = false
-offset_right = 40.0
-offset_bottom = 40.0
-columns = 10
-
-[node name="PlayerRichLabelTemplate" type="RichTextLabel" parent="PlayerListGrid"]
-visible = false
-layout_mode = 2
-fit_content = true
-autowrap_mode = 0
-
-[node name="PlayerLabel" type="Label" parent="PlayerListGrid"]
-visible = false
-layout_mode = 2
 
 [node name="GameTick" type="Timer" parent="."]
 wait_time = 0.819
@@ -42,34 +26,15 @@ one_shot = true
 [node name="HistoryTick" type="Timer" parent="."]
 wait_time = 0.05
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(594, 302)
-
 [node name="BoardViewer" type="Node2D" parent="."]
 position = Vector2(201, 300)
 script = ExtResource("2_uvhcv")
 x_step = 300
 y_step = 300
 
-[node name="LostMoves" type="Label" parent="."]
-visible = false
-offset_left = 857.0
-offset_top = 88.0
-offset_right = 953.0
-offset_bottom = 111.0
-text = "Lost moves: "
-
 [node name="Camera" type="Camera2D" parent="."]
-position = Vector2(101, 122)
+position = Vector2(472, 310)
 zoom = Vector2(0.8, 0.8)
-
-[node name="DebugLayer" type="CanvasLayer" parent="."]
-
-[node name="CurrentBuffer" type="Label" parent="DebugLayer"]
-offset_left = 355.0
-offset_top = 9.0
-offset_right = 526.0
-offset_bottom = 77.0
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -85,6 +50,16 @@ offset_top = 79.0
 offset_right = 77.0
 offset_bottom = 102.0
 text = "Moves: "
+
+[node name="ScoreTracker" parent="UI" instance=ExtResource("5_cn36e")]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -136.0
+offset_right = 12.0
+offset_bottom = -136.0
+grow_vertical = 0
 
 [node name="BoardHolder" type="Node2D" parent="."]
 script = ExtResource("4_txyyy")

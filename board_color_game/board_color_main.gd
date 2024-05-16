@@ -1,5 +1,6 @@
 extends Node2D
 
+@export var normal_category_item := 0
 @export_category("Board setup")
 @export var number_of_simultaneous_games := 10
 @export var number_of_boards_per_group := 100
@@ -32,7 +33,6 @@ var board_groups : Dictionary
 var board_group_queue: Array[int]
 var board_group_moves : Dictionary
 var board_group_id_latest = -1
-#var boards : Array[Board] = []
 const number_of_players_on_board = 4
 
 var move_counter := 0.0
@@ -47,19 +47,22 @@ var zoom := Vector2(1, 1)
 @onready var move_counter_ui = $UI/MoveCounter
 @onready var board_holder = $BoardHolder
 @onready var board_queue_timer = $BoardQueueTimer
+@onready var score_tracker = $UI/ScoreTracker
 
 
-# debug
-var lost_moves = 0 
-
+# TODO add a color variable to keep the color persistent.
+# Need to update the player colors used in start_game()
 class Player:
+	var player_id : int
 	var player_name : String
+	var player_color : Color
 	var active : bool
 	var disconnect_time : int = 0
 	var observers : Array[int] # A list of all observers
 	var board_group : int = -1
 	
 	var score = 0
+	var mmr = 1000
 
 	func _init(player_name_inp: String):
 		self.player_name = player_name_inp
@@ -86,8 +89,6 @@ func _get_num_of_connected_players():
 		if players[player].active:
 			num_of_active_players += 1
 	return num_of_active_players
-
-var players_test = {10: Color.CADET_BLUE, 11: Color.CHARTREUSE, 12: Color.YELLOW_GREEN, 13: Color.WEB_MAROON}
 
 # This is for testing
 #var current_board = 0
@@ -127,11 +128,17 @@ func _player_connected(player_id: int, player_name: String):
 		print("Observer connected. Don't really do anything")
 		return
 	print_debug("Player connected: %s %s" % [player_id, player_name])
-	players[player_id] = Player.new(player_name)
+	
+	if not player_id in players:
+		players[player_id] = Player.new(player_name)
+		players[player_id].player_color = Color(randf(), randf(), randf())
+		players[player_id].player_id = player_id
+
 	side_bar.add_player(players[player_id].player_name, player_id)
 	
 	send_message(player_id, "Welcome to the Game!")
 	add_player_to_queue(player_id)
+	score_tracker.add_player(player_id, players[player_id])
 	
 func add_player_to_queue(player_id: int):
 	board_group_queue.append(player_id)
@@ -141,6 +148,8 @@ func _start_game_with_check():
 	# TODO Fix hard coded 4. It should be replaced with the number of players
 	# on a board. 
 	while len(board_group_queue) >= 4:
+		board_group_queue.shuffle()
+		
 		var new_group = board_group_queue.slice(0, 4)
 		if new_group.size() == 4:
 			var board_players_still_active = true
@@ -202,9 +211,7 @@ func _receive_player_message(player_id, message):
 		if len(board_group_moves[players[player_id].board_group]) == 4:
 			moves_received(players[player_id].board_group)
 	else:
-		lost_moves += 1
 		print_rich("Lost move from [color=black]" + str(player_id) + ". Message = [color=red]" + message)
-		$LostMoves.set_text("Lost moves: " + str(lost_moves))
 		GameServer.send_string(player_id, "RESEND_MOVE")
 	
 	
@@ -349,17 +356,30 @@ func start_game(players_list: Array[int]):
 func game_over(board_group_id: int):
 	# TODO: Gather statistics and add to the players
 	# TODO: 
+	#Score.calculate_score()
 	if len(board_groups[board_group_id]) == 0 or not board_groups[board_group_id][0]:
 		return
-		
+	
+	var player_scores: Dictionary = {}
 	for player_id in board_groups[board_group_id][0].player_colors:
+		player_scores[player_id] = [0.0, players[player_id].mmr]
 		if players[player_id].active:
 			GameServer.send_string(player_id, "GAME_OVER")
 			
 			add_player_to_queue(player_id)
 	
+	var walkable_tiles := 0
 	for board: Node in board_groups[board_group_id]:
+		var local_stats : Dictionary = board.get_stats().back()
+		walkable_tiles += board.get_num_of_walkable_tiles()
+		for player_id in local_stats: # Dictionary {player_id: score}
+			player_scores[player_id][0] += local_stats[player_id]
+			
 		board.queue_free()
+	print("Player_scores= ", player_scores, " walkable tiles= ", walkable_tiles)
+	var new_mmr = Score.calculate_score(player_scores, walkable_tiles)
+	for player_id in new_mmr:
+		players[player_id].mmr = new_mmr[player_id]
 	board_groups[board_group_id].clear()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
