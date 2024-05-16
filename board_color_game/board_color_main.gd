@@ -54,6 +54,7 @@ var zoom := Vector2(1, 1)
 # Need to update the player colors used in start_game()
 class Player:
 	var player_name : String
+	var player_color : Color
 	var active : bool
 	var disconnect_time : int = 0
 	var observers : Array[int] # A list of all observers
@@ -126,7 +127,11 @@ func _player_connected(player_id: int, player_name: String):
 		print("Observer connected. Don't really do anything")
 		return
 	print_debug("Player connected: %s %s" % [player_id, player_name])
-	players[player_id] = Player.new(player_name)
+	
+	if not player_id in players:
+		players[player_id] = Player.new(player_name)
+		players[player_id].player_color = Color(randf(), randf(), randf())
+
 	side_bar.add_player(players[player_id].player_name, player_id)
 	
 	send_message(player_id, "Welcome to the Game!")
@@ -141,6 +146,8 @@ func _start_game_with_check():
 	# TODO Fix hard coded 4. It should be replaced with the number of players
 	# on a board. 
 	while len(board_group_queue) >= 4:
+		board_group_queue.shuffle()
+		
 		var new_group = board_group_queue.slice(0, 4)
 		if new_group.size() == 4:
 			var board_players_still_active = true

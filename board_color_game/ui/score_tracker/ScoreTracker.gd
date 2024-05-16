@@ -16,7 +16,7 @@ func add_player(player_id: int, player_obj):
 	players[player_id] = player_obj
 	
 func add_line_item(new_line, player_id):
-	var n_color = Color(randf(), randf(), randf())
+	var n_color = players[player_id].player_color
 	new_line.set_color(n_color)
 	player_names.add_child(new_line)
 	chart_2d.add_plot(str(player_id), chart_plots[player_id], n_color)

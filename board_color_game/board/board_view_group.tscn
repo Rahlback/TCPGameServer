@@ -87,7 +87,6 @@ custom_minimum_size = Vector2(0, 80.78)
 layout_mode = 2
 mouse_filter = 2
 script = ExtResource("3_ncssj")
-HELLO_WORLD = null
 ignore_x_values = true
 show_axis = false
 dynamic_axis_values = true
