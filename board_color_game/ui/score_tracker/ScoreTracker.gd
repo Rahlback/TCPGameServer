@@ -2,6 +2,7 @@ extends Control
 
 var players : Dictionary # reference to a dictionary
 var chart_plots : Dictionary
+var number_of_plot_points := 100
 
 @onready var player_names = $StatViewer/PlayerNames
 @onready var chart_2d = $StatViewer/Chart2D
@@ -41,6 +42,7 @@ func add_line_items():
 			chart_plots[player.player_id] = [Vector2(0, round(player.mmr))]
 		else:
 			chart_plots[player.player_id].append(Vector2(0, round(player.mmr)))
+			chart_plots[player.player_id] = chart_plots[player.player_id].slice(-number_of_plot_points)
 
 func _update_player_mmr():
 	add_line_items()
