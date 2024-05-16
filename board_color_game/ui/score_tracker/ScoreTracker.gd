@@ -25,16 +25,22 @@ func add_line_items():
 	for item in player_names.get_children():
 		item.queue_free()
 		
-	for player_id in players:
-		var player_name_string = players[player_id].player_name + ": " + str(round(players[player_id].mmr))
+	var player_arr = players.values()
+	
+	var mmr_sort = func(playerA, playerB):
+		return playerA.mmr > playerB.mmr
+	player_arr.sort_custom(mmr_sort)
+		
+	for player in player_arr:
+		var player_name_string = player.player_name + ": " + str(round(player.mmr))
 		var new_line := SIDE_BAR_ITEM.instantiate()
 		new_line.set_player_name(player_name_string)
-		call_deferred("add_line_item", new_line, player_id)
+		call_deferred("add_line_item", new_line, player.player_id)
 		
-		if not player_id in chart_plots:
-			chart_plots[player_id] = [Vector2(0, round(players[player_id].mmr))]
+		if not player.player_id in chart_plots:
+			chart_plots[player.player_id] = [Vector2(0, round(player.mmr))]
 		else:
-			chart_plots[player_id].append(Vector2(0, round(players[player_id].mmr)))
+			chart_plots[player.player_id].append(Vector2(0, round(player.mmr)))
 
 func _update_player_mmr():
 	add_line_items()

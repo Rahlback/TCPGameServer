@@ -53,6 +53,7 @@ var zoom := Vector2(1, 1)
 # TODO add a color variable to keep the color persistent.
 # Need to update the player colors used in start_game()
 class Player:
+	var player_id : int
 	var player_name : String
 	var player_color : Color
 	var active : bool
@@ -131,6 +132,7 @@ func _player_connected(player_id: int, player_name: String):
 	if not player_id in players:
 		players[player_id] = Player.new(player_name)
 		players[player_id].player_color = Color(randf(), randf(), randf())
+		players[player_id].player_id = player_id
 
 	side_bar.add_player(players[player_id].player_name, player_id)
 	
