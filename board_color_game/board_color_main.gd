@@ -147,7 +147,7 @@ func add_player_to_queue(player_id: int):
 func _start_game_with_check():
 	# TODO Fix hard coded 4. It should be replaced with the number of players
 	# on a board. 
-	while len(board_group_queue) >= 4:
+	if len(board_group_queue) >= 4:
 		board_group_queue.shuffle()
 		
 		var new_group = board_group_queue.slice(0, 4)

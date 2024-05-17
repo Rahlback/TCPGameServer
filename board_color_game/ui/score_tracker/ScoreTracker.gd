@@ -5,7 +5,7 @@ var chart_plots : Dictionary
 var number_of_plot_points := 100
 
 @onready var player_names = $StatViewer/PlayerNames
-@onready var chart_2d = $StatViewer/Chart2D
+@onready var chart_2d = $Chart2D
 
 ## This might have to be changed. But for now this will work great
 const SIDE_BAR_ITEM = preload("res://board_color_game/ui/sidebar/SideBarItem.tscn")
@@ -20,6 +20,9 @@ func add_line_item(new_line, player_id):
 	var n_color = players[player_id].player_color
 	new_line.set_color(n_color)
 	player_names.add_child(new_line)
+	#if chart_2d.has_plot_legend(str(player_id)):
+		#chart_2d.append_plot(str(player_id), chart_plots[player_id].back())
+	#else:
 	chart_2d.add_plot(str(player_id), chart_plots[player_id], n_color)
 
 func add_line_items():

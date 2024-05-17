@@ -8,7 +8,7 @@
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_vbcky")
-number_of_boards_per_group = 20
+number_of_boards_per_group = 500
 max_board_width = 20
 max_board_height = 20
 image_scale = 15
@@ -55,10 +55,10 @@ text = "Moves: "
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = -237.0
-offset_right = 16.0
-offset_bottom = -237.0
+offset_left = 15.0
+offset_top = -341.0
+offset_right = 15.0
+offset_bottom = -341.0
 grow_vertical = 0
 
 [node name="BoardHolder" type="Node2D" parent="."]
@@ -66,7 +66,7 @@ script = ExtResource("4_txyyy")
 boards_per_row = 10
 
 [node name="BoardQueueTimer" type="Timer" parent="."]
-wait_time = 0.5
+wait_time = 0.1
 autostart = true
 
 [connection signal="timeout" from="GameTick" to="." method="_on_game_tick_timeout"]

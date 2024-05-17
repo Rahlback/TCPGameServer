@@ -133,12 +133,57 @@ func add_plot(plot_legend_name: String, plot_points : PackedVector2Array, plot_c
 	plots[plot_legend_name] = new_plot
 	queue_redraw()
 
+func append_plot(plot_legend_name: String, plot_point: Vector2):
+	if plot_legend_name in plots:
+		var coord_point = _convert_single_point_to_coords(plot_point, plot_legend_name, true)
+		#coord_point.x = len(plots[plot_legend_name].plot_points)
+		#print("Add coord_point: ", coord_point)
+		plots[plot_legend_name].plot_points.append(coord_point)
+		print(plots[plot_legend_name].plot_points)
+		queue_redraw()
+
+func has_plot_legend(plot_legend_name: String):
+	return plot_legend_name in plots
+
 func _recalculate_plots():
 	_setup_chart()
 	var duplicate_plots = plots.duplicate(true)
 	for plot_name in duplicate_plots:
 		var plot : PlotItem = duplicate_plots[plot_name]
 		add_plot(plot_name, plot.original_points, plot.plot_color)
+
+## You will have to check that the point is inside the chart area when you receive
+## the coord_point back
+func _convert_single_point_to_coords(point: Vector2, plot_legend : String = "", append_point := false) -> Vector2:
+	var max_axis_mem = Vector2i(max_axis_value)
+	var min_axis_mem = Vector2i(min_axis_value)
+
+	if ignore_x_values and plot_legend and append_point:
+		point.x = len(plots[plot_legend].plot_points)
+
+	if dynamic_axis_values and not Engine.is_editor_hint():
+		if point.x > max_axis_value.x:
+			max_axis_value.x = point.x
+		if point.x < min_axis_value.x:
+			min_axis_value.x = point.x
+		if point.y > max_axis_value.y:
+			max_axis_value.y = point.y
+		if point.y < min_axis_value.y:
+			min_axis_value.y = point.y
+
+	#if remove_points_outside_chart_area and not dynamic_axis_values:
+		### TODO: Insert points at the edge of the chart, maybe?
+		#if point.x > max_axis_value.x or point.y > max_axis_value.y:
+			#continue
+		#if point.x < min_axis_value.x or point.y < min_axis_value.y:
+			#continue
+	var coord_point = Vector2(point.x * pixel_step.x + mid_point.x, -point.y * pixel_step.y + mid_point.y)
+	
+	if max_axis_mem != max_axis_value or min_axis_mem != min_axis_value:
+		print("Trigger axis change calculation")
+		call_deferred("_recalculate_plots")
+	
+	return coord_point
 
 func _convert_points_to_coords(plot_points: PackedVector2Array) -> PackedVector2Array:
 	var coord_points : PackedVector2Array
@@ -175,6 +220,7 @@ func _convert_points_to_coords(plot_points: PackedVector2Array) -> PackedVector2
 			coord_points.append(coord_point)
 		
 	if max_axis_mem != max_axis_value or min_axis_mem != min_axis_value:
+		print("Trigger axis change calculation")
 		call_deferred("_recalculate_plots")
 	return coord_points
 
@@ -203,4 +249,5 @@ func _draw():
 							  line_width_px, anti_aliased)
 
 func _size_changed():
+	#print("Trigger axis change calculation")
 	_recalculate_plots()

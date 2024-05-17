@@ -43,7 +43,7 @@ offset_right = 71.0
 offset_bottom = -404.0
 
 [node name="StatUpdateTimer" type="Timer" parent="."]
-wait_time = 0.05
+wait_time = 0.213
 autostart = true
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]

@@ -14,21 +14,24 @@ autostart = true
 
 [node name="StatViewer" type="HBoxContainer" parent="."]
 layout_mode = 0
-offset_right = 40.0
+offset_right = 48.0
 offset_bottom = 40.0
 
 [node name="PlayerNames" type="VBoxContainer" parent="StatViewer"]
 custom_minimum_size = Vector2(48.15, 0)
 layout_mode = 2
 
-[node name="Chart2D" type="Control" parent="StatViewer"]
-custom_minimum_size = Vector2(600, 200)
+[node name="Chart2D" type="Control" parent="."]
 layout_mode = 2
+anchors_preset = 0
+offset_left = 230.0
+offset_top = -1.0
+offset_right = 430.0
+offset_bottom = 199.0
 script = ExtResource("2_t4o26")
 ignore_x_values = true
-show_axis = false
+ignore_values_outside_max = false
 dynamic_axis_values = true
-max_axis_value = Vector2i(100, 2000)
 axis_line_width = 1
 
 [connection signal="timeout" from="Timer" to="." method="_update_player_mmr"]
