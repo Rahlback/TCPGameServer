@@ -12,10 +12,10 @@ script = ExtResource("1_sa1vw")
 wait_time = 0.1
 autostart = true
 
-[node name="StatViewer" type="HBoxContainer" parent="."]
+[node name="StatViewer" type="ScrollContainer" parent="."]
 layout_mode = 0
-offset_right = 48.0
-offset_bottom = 40.0
+offset_right = 226.0
+offset_bottom = 199.0
 
 [node name="PlayerNames" type="VBoxContainer" parent="StatViewer"]
 custom_minimum_size = Vector2(48.15, 0)
